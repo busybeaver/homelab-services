@@ -1,0 +1,8 @@
+{
+  "extends": [
+    "github>busybeaver/homelab-shared//.github/renovate.json5",
+    ":docker",
+    "docker:pinDigests",
+    "docker:enableMajor"
+  ]
+}
