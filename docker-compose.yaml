@@ -1,7 +1,7 @@
 version: "3.9"
 services:
   caddy:
-    image: ghcr.io/busybeaver/homelab-packages/caddy:latest
+    image: ghcr.io/busybeaver/homelab-packages/caddy:2023-04-08
     container_name: caddy
     network_mode: host
     labels:
@@ -74,7 +74,7 @@ services:
     restart: always
 
   node-red:
-    image: ghcr.io/busybeaver/homelab-packages/node-red:latest
+    image: ghcr.io/busybeaver/homelab-packages/node-red:2023-04-08
     container_name: node-red
     networks:
       internal_network:
