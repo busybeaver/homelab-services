@@ -1,7 +1,7 @@
 version: "3.9"
 services:
   caddy:
-    image: ghcr.io/busybeaver/homelab-packages/caddy:2023-04-08
+    image: ghcr.io/busybeaver/homelab-packages/caddy:2023-04-08@sha256:eb37103fa2d68c2335089933fbebffdbaf56bbfb949a2abb93c37c47fbb0cf7d
     container_name: caddy
     network_mode: host
     labels:
@@ -57,7 +57,7 @@ services:
   # TODO: this needs to be put into the internal network
   homebridge:
     # port: "${HOMEBRIDGE_PORT}"
-    image: oznu/homebridge:2023-01-08
+    image: oznu/homebridge:2023-01-08@sha256:f46e9c82e4f3449e18c2b61014ba13474343fed703537983db0f59a2a4b97c31
     container_name: homebridge
     network_mode: host
     dns: "${DNS_IP}"
@@ -74,7 +74,7 @@ services:
     restart: always
 
   node-red:
-    image: ghcr.io/busybeaver/homelab-packages/node-red:2023-04-08
+    image: ghcr.io/busybeaver/homelab-packages/node-red:2023-04-08@sha256:0b0824e95e851205592a6739e165ccac7f708e505f845b580b4f46f4224f7453
     container_name: node-red
     networks:
       internal_network:
@@ -98,7 +98,7 @@ services:
     restart: always
 
   n8n:
-    image: n8nio/n8n:0.223.0
+    image: n8nio/n8n:0.223.0@sha256:5704f7c3e11f643675569cc6881be7d0eeef4bddc3bd8ebf919327ffc438260d
     container_name: n8n
     networks:
       internal_network:
