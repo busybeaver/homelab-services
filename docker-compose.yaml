@@ -150,17 +150,3 @@ networks:
         - subnet: "${DOCKER_VLAN_IP_PREFIX}.0/24"
           ip_range: "${DOCKER_VLAN_IP_PREFIX}.128/25"
           gateway: "${DNS_IP}"
-  docker_internal:
-    driver: bridge
-    driver_opts:
-      com.docker.network.enable_ipv6: "false"
-    ipam:
-      config:
-        - subnet: "${INTERNAL_NETWORK_IP_PREFIX}.0/24"
-  # external_network:
-  #   driver: bridge
-  #   driver_opts:
-  #     com.docker.network.enable_ipv6: "false"
-  #   ipam:
-  #     config:
-  #       - subnet: "${EXTERNAL_NETWORK_IP_PREFIX}.0/16"
