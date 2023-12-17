@@ -98,7 +98,7 @@ services:
     restart: always
 
   n8n:
-    image: n8nio/n8n:1.0.4@sha256:ec5f5a6cfbcda11d02ed9ea594735e59f8dd061338abf63da940c3710b874d0f
+    image: n8nio/n8n:1.21.1@sha256:a3e0c5e698d4e204b1cf48df7d991263e7af5c2a57a0fee57d1ee5aa262cd1fc
     container_name: n8n
     networks:
       internal_network:
