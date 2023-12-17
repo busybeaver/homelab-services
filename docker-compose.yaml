@@ -32,7 +32,7 @@ services:
   #   restart: always
 
   adguard-home:
-    image: adguard/adguardhome
+    image: adguard/adguardhome@sha256:4016a420451810959f782d3cbe04c620d83c3431cbb13ae27aabd2921db482a0
     container_name: adguard-home
     networks:
       dockervlan:
