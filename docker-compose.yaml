@@ -47,7 +47,7 @@ services:
     security_opt:
       - no-new-privileges:true
     tmpfs:
-      - "/tmp:rw,noexec,nosuid,nodev,size=100m,mode=660,uid=${ADGUARD_USER},gid=${DOCKER_USER_GROUP}"
+      - "/tmp:rw,noexec,nosuid,nodev,size=64m,mode=660,uid=${ADGUARD_USER},gid=${DOCKER_USER_GROUP}"
     volumes:
       - ${VOLUME_BASE_DIRECTORY}/adguard/conf:/opt/adguardhome/conf:rw
       - ${VOLUME_BASE_DIRECTORY}/adguard/work:/opt/adguardhome/work:rw
@@ -60,11 +60,39 @@ services:
     #   retries: 5
     #   start_period: 30s
     restart: always
+  homebridge:
+    image: homebridge/homebridge
+    container_name: homebridge
+    networks:
+      dockervlan:
+        ipv4_address: "${DOCKER_VLAN_IP_PREFIX}.131"
+    # network_mode: host
+    dns: "${DNS_IP}"
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - "/tmp:rw,noexec,nosuid,nodev,size=32m,mode=660,uid=${HOMEBRIDGE_USER},gid=${DOCKER_USER_GROUP}"
+    volumes:
+      - ${VOLUME_BASE_DIRECTORY}/homebridge:/homebridge:rw
+    environment:
+      - TZ=${TIMEZONE}
+      - PUID=${HOMEBRIDGE_USER}
+      - PGID=100
+#      - "PGID=${DOCKER_USER_GROUP}"
+      - HOMEBRIDGE_CONFIG_UI=1
+      - HOMEBRIDGE_CONFIG_UI_PORT=80
+#      - DSM_HOSTNAME=station
+    restart: always
 
 #   # TODO: this needs to be put into the internal network
 #   homebridge:
 #     # port: "${HOMEBRIDGE_PORT}"
-#     image: oznu/homebridge:2023-01-08@sha256:f46e9c82e4f3449e18c2b61014ba13474343fed703537983db0f59a2a4b97c31
+#     image: homebridge/homebridge
 #     container_name: homebridge
 #     network_mode: host
 #     dns: "${DNS_IP}"
