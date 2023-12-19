@@ -32,7 +32,7 @@ services:
   #   restart: always
 
   adguard-home:
-    image: adguard/adguardhome@sha256:4016a420451810959f782d3cbe04c620d83c3431cbb13ae27aabd2921db482a0
+    image: adguard/adguardhome:v0.107.43@sha256:4016a420451810959f782d3cbe04c620d83c3431cbb13ae27aabd2921db482a0
     container_name: adguard-home
     networks:
       dockervlan:
@@ -79,7 +79,7 @@ services:
     tmpfs:
       - "/tmp:rw,noexec,nosuid,nodev,size=32m,mode=660,uid=${HOMEBRIDGE_USER},gid=${DOCKER_USER_GROUP}"
       # s6-overlay
-      - "/run:rw,size=8m"
+      - "/run:rw,size=8m,uid=1"
     volumes:
       - ${VOLUME_BASE_DIRECTORY}/homebridge:/homebridge:rw
     environment:
