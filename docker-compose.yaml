@@ -118,7 +118,7 @@ services:
     #   timeout: 2s
 
   uptime-kuma:
-    image: louislam/uptime-kuma:1.23.11-alpine
+    image: louislam/uptime-kuma:1.23.11-alpine@sha256:f7c59b4ba04a63b57f4f8210be77cf90221991a3250ec301136183c56de579ab
     container_name: uptime-kuma
     networks:
       dockervlan:
