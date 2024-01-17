@@ -110,6 +110,49 @@ services:
 #       - HOMEBRIDGE_CONFIG_UI_PORT=${HOMEBRIDGE_PORT}
 #       - DSM_HOSTNAME=station
 #     restart: always
+    # healthcheck:
+    #   test: curl --fail localhost:8581 || exit 1
+    #   interval: 60s
+    #   retries: 5
+    #   start_period: 300s
+    #   timeout: 2s
+
+  uptime-kuma:
+    image: louislam/uptime-kuma:1.23.11-alpine
+    container_name: uptime-kuma
+    networks:
+      dockervlan:
+        ipv4_address: "${DOCKER_VLAN_IP_PREFIX}.132"
+    dns: "${DNS_IP}"
+    user: "${UPTIME_KUMA_USER}:${DOCKER_USER_GROUP}"
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+    read_only: true
+    # security_opt:
+    #   - no-new-privileges:true
+    tmpfs:
+      - "/tmp:rw,noexec,nosuid,nodev,size=64m,mode=660,uid=${UPTIME_KUMA_USER},gid=${DOCKER_USER_GROUP}"
+    volumes:
+      - ${VOLUME_BASE_DIRECTORY}/uptime-kuma/data:/app/data:rw
+    environment:
+      # change to 433 after SSL cert setup
+      - UPTIME_KUMA_PORT=80
+      # change later to proper domain with the cert
+      - UPTIME_KUMA_HOST=${DOCKER_VLAN_IP_PREFIX}.132
+      #- UPTIME_KUMA_SSL_KEY=
+      #- UPTIME_KUMA_SSL_CERT=
+      #- UPTIME_KUMA_SSL_KEY_PASSPHRASE=
+      - PUID=${UPTIME_KUMA_USER}
+      - PGID=${DOCKER_USER_GROUP}
+    # healthcheck:
+    #   test: ["executable", "arg"]
+    #   interval: 1m30s
+    #   timeout: 30s
+    #   retries: 5
+    #   start_period: 30s
+    restart: always
 
 #   node-red:
 #     image: ghcr.io/busybeaver/homelab-packages/node-red:2023-04-08@sha256:0b0824e95e851205592a6739e165ccac7f708e505f845b580b4f46f4224f7453
