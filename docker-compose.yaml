@@ -124,11 +124,16 @@ services:
       dockervlan:
         ipv4_address: "${DOCKER_VLAN_IP_PREFIX}.132"
     dns: "${DNS_IP}"
-    user: "${UPTIME_KUMA_USER}:${DOCKER_USER_GROUP}"
+    # TODO: with v2 we can properly use users:
+    # https://github.com/louislam/uptime-kuma/pull/4052
+    # https://github.com/louislam/uptime-kuma/pull/4171
+    # user: "${UPTIME_KUMA_USER}:${DOCKER_USER_GROUP}"
     cap_drop:
       - ALL
     cap_add:
       - NET_BIND_SERVICE
+      # health checks such as pings
+      - NET_RAW
     read_only: true
     # security_opt:
     #   - no-new-privileges:true
