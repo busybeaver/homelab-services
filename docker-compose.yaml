@@ -150,7 +150,8 @@ services:
       #- UPTIME_KUMA_SSL_CERT=
       #- UPTIME_KUMA_SSL_KEY_PASSPHRASE=
       - PUID=${UPTIME_KUMA_USER}
-      - PGID=${DOCKER_USER_GROUP}
+      # - PGID=${DOCKER_USER_GROUP}
+      - PGID=100
     # healthcheck:
     #   test: ["executable", "arg"]
     #   interval: 1m30s
