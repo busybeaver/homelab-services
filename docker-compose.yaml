@@ -118,16 +118,13 @@ services:
     #   timeout: 2s
 
   uptime-kuma:
-    image: louislam/uptime-kuma:1.23.11-alpine
+    image: ghcr.io/busybeaver/homelab-packages/uptime-kuma:2024-01-17@sha256:8535859fbfd42b20e157dd19d4d8558cffc45e6454b88998029a49838ebff999
     container_name: uptime-kuma
     networks:
       dockervlan:
         ipv4_address: "${DOCKER_VLAN_IP_PREFIX}.132"
     dns: "${DNS_IP}"
-    # TODO: with v2 we can properly use users:
-    # https://github.com/louislam/uptime-kuma/pull/4052
-    # https://github.com/louislam/uptime-kuma/pull/4171
-    # user: "${UPTIME_KUMA_USER}:${DOCKER_USER_GROUP}"
+    user: "${UPTIME_KUMA_USER}:${DOCKER_USER_GROUP}"
     cap_drop:
       - ALL
     cap_add:
@@ -149,9 +146,8 @@ services:
       #- UPTIME_KUMA_SSL_KEY=
       #- UPTIME_KUMA_SSL_CERT=
       #- UPTIME_KUMA_SSL_KEY_PASSPHRASE=
-      - PUID=${UPTIME_KUMA_USER}
+      #- PUID=${UPTIME_KUMA_USER}
       # - PGID=${DOCKER_USER_GROUP}
-      - PGID=100
     # healthcheck:
     #   test: ["executable", "arg"]
     #   interval: 1m30s
