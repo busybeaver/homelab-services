@@ -118,7 +118,7 @@ services:
     #   timeout: 2s
 
   uptime-kuma:
-    image: ghcr.io/busybeaver/homelab-packages/uptime-kuma:2024-01-17@sha256:443b07d0dbf235532ae630d7eb7e3b0ffa0bab7a76bc2ce2910f15ae09aac569
+    image: ghcr.io/busybeaver/homelab-packages/uptime-kuma:2024-01-18@sha256:6596fe773dd151c7cfa7f79bd968dedb1e201b5240119e54fc2d92761e2420cd
     container_name: uptime-kuma
     networks:
       dockervlan:
