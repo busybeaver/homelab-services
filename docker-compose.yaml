@@ -69,6 +69,7 @@ services:
         ipv4_address: "${DOCKER_VLAN_IP_PREFIX}.131"
     # network_mode: host
     dns: "${DNS_IP}"
+    user: "${HOMEBRIDGE_USER}:${DOCKER_USER_GROUP}"
     cap_drop:
       - ALL
     cap_add:
@@ -84,8 +85,8 @@ services:
       - ${VOLUME_BASE_DIRECTORY}/homebridge:/homebridge:rw
     environment:
       - TZ=${TIMEZONE}
-      - PUID=${HOMEBRIDGE_USER}
-      - PGID=100
+      # - PUID=${HOMEBRIDGE_USER}
+      # - PGID=100
 #      - "PGID=${DOCKER_USER_GROUP}"
       - HOMEBRIDGE_CONFIG_UI=1
       - HOMEBRIDGE_CONFIG_UI_PORT=80
