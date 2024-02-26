@@ -14,10 +14,10 @@ on:
   schedule:
     - cron: '0 12 * * 1'
 
-concurrency:
-  # on main, we want all builds to complete even if commits/merging happens faster to make it easier to discover at which point
-  # something broke; else, we cancel "old" builds and run/(re)start the build with the latest changes
-  group: ${{ github.ref == 'refs/heads/main' && format('ci-main-{0}-{1}', github.workflow, github.sha) || format('ci-{0}-{1}', github.workflow, github.ref) }}
+# concurrency:
+#   # on main, we want all builds to complete even if commits/merging happens faster to make it easier to discover at which point
+#   # something broke; else, we cancel "old" builds and run/(re)start the build with the latest changes
+#   group: ${{ github.ref == 'refs/heads/main' && format('ci-main-{0}-{1}', github.workflow, github.sha) || format('ci-{0}-{1}', github.workflow, github.ref) }}
 
 jobs:
   general:
