@@ -1,0 +1,29 @@
+name: "Repository CI"
+
+on:
+  # run on pushes to main
+  push:
+    branches:
+      - main
+      - gh-readonly-queue/main/**
+  # run on pull requests that target the main branch
+  pull_request:
+    branches:
+      - main
+  # run on pull request events
+  pull_request_target:
+    types:
+      - opened
+      - synchronize
+      - edited
+      - reopened
+      # - review_requested
+    branches:
+      - main
+
+jobs:
+  repository:
+    uses: busybeaver/homelab-shared/.github/workflows/repository.yaml@dd0d1d1d4c574648d7e8cd57ab60e2078284fc19 # v1.0.37
+    secrets:
+      REPOSITORY_ASSISTANT_APP_ID: ${{ secrets.REPOSITORY_ASSISTANT_APP_ID }}
+      REPOSITORY_ASSISTANT_PRIVATE_KEY: ${{ secrets.REPOSITORY_ASSISTANT_PRIVATE_KEY }}
