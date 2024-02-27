@@ -62,7 +62,7 @@ services:
     restart: always
 
   homebridge:
-    image: ghcr.io/busybeaver/homelab-packages/homebridge:latest@sha256:be1ed6396d182cc4590d10ca1b8277430cbc561a0af0cae9c4a263081641efa4
+    image: ghcr.io/busybeaver/homelab-packages/homebridge:latest@sha256:ad92c3ddfc8595e466e3d5f7b142280db532054d8cb20965801eef7363b96d1e
     container_name: homebridge
     networks:
       dockervlan:
