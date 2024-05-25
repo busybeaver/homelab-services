@@ -37,6 +37,7 @@ services:
     networks:
       dockervlan:
         ipv4_address: "${DOCKER_VLAN_IP_PREFIX}.130"
+        mac_address: "${ADGUARD_MAC_ADDRESS}"
     dns: "${DNS_IP}"
     user: "${ADGUARD_USER}:${DOCKER_USER_GROUP}"
     cap_drop:
@@ -66,7 +67,8 @@ services:
 #     container_name: homebridge
 #     networks:
 #       dockervlan:
-#         ipv4_address: "${DOCKER_VLAN_IP_PREFIX}.131"
+#         ipv4_address: "${DOCKER_VLAN_IP_PREFIX}.133"
+#         mac_address: "${UPTIME_HOMEBRIDGE_ADDRESS}"
 #     # network_mode: host
 #     dns: "${DNS_IP}"
 #     user: "${HOMEBRIDGE_USER}:${DOCKER_USER_GROUP}"
@@ -98,37 +100,13 @@ services:
 # #      - DSM_HOSTNAME=station
 #     restart: always
 
-#   # TODO: this needs to be put into the internal network
-#   homebridge:
-#     # port: "${HOMEBRIDGE_PORT}"
-#     image: homebridge/homebridge
-#     container_name: homebridge
-#     network_mode: host
-#     dns: "${DNS_IP}"
-#     volumes:
-#       - ${VOLUME_BASE_DIRECTORY}/homebridge:/homebridge:rw
-#     environment:
-#       - TZ=${TIMEZONE}
-#       - PUID=${HOMEBRIDGE_USER}
-#       - PGID=100
-# #      - "PGID=${DOCKER_USER_GROUP}"
-#       - HOMEBRIDGE_CONFIG_UI=1
-#       - HOMEBRIDGE_CONFIG_UI_PORT=${HOMEBRIDGE_PORT}
-#       - DSM_HOSTNAME=station
-#     restart: always
-    # healthcheck:
-    #   test: curl --fail localhost:8581 || exit 1
-    #   interval: 60s
-    #   retries: 5
-    #   start_period: 300s
-    #   timeout: 2s
-
   uptime-kuma:
     image: ghcr.io/busybeaver/homelab-packages/uptime-kuma:2024-01-18@sha256:6596fe773dd151c7cfa7f79bd968dedb1e201b5240119e54fc2d92761e2420cd
     container_name: uptime-kuma
     networks:
       dockervlan:
         ipv4_address: "${DOCKER_VLAN_IP_PREFIX}.132"
+        mac_address: "${UPTIME_KUMA_MAC_ADDRESS}"
     dns: "${DNS_IP}"
     user: "${UPTIME_KUMA_USER}:${DOCKER_USER_GROUP}"
     cap_drop:
@@ -163,11 +141,12 @@ services:
     restart: always
 
   node-red:
-    image: ghcr.io/busybeaver/homelab-packages/node-red:2023-04-08@sha256:0b0824e95e851205592a6739e165ccac7f708e505f845b580b4f46f4224f7453
+    image: ghcr.io/busybeaver/homelab-packages/node-red:2024-05-25@sha256:6c70cfeedeb26d1c6e42cf9b4f6fb15f4ac947d54fc5452c90d2bd69586f193d
     container_name: node-red
     networks:
-      internal_network:
-        ipv4_address: "${INTERNAL_NETWORK_IP_PREFIX}.3"
+      dockervlan:
+        ipv4_address: "${DOCKER_VLAN_IP_PREFIX}.131"
+        mac_address: "${UPTIME_NODE_RED_ADDRESS}"
     # expose:
     #   - "${NODE_RED_PORT}"
     dns: "${DNS_IP}"
