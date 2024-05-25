@@ -61,42 +61,42 @@ services:
     #   start_period: 30s
     restart: always
 
-  homebridge:
-    image: ghcr.io/busybeaver/homelab-packages/homebridge:latest@sha256:4ef9a16ecc0b24be5dd537e6b344491d72e4cd1a353790a347c908dad426fd94
-    container_name: homebridge
-    networks:
-      dockervlan:
-        ipv4_address: "${DOCKER_VLAN_IP_PREFIX}.131"
-    # network_mode: host
-    dns: "${DNS_IP}"
-    user: "${HOMEBRIDGE_USER}:${DOCKER_USER_GROUP}"
-    cap_drop:
-      - ALL
-    cap_add:
-      - NET_BIND_SERVICE
-    read_only: true
-    # security_opt:
-    #   - no-new-privileges:true
-    tmpfs:
-      - "/tmp:rw,noexec,nosuid,nodev,size=32m,mode=660,uid=${HOMEBRIDGE_USER},gid=${DOCKER_USER_GROUP}"
-      # s6-overlay
-      # - "/run:rw,size=8m,uid=0"
-    volumes:
-      - ${VOLUME_BASE_DIRECTORY}/homebridge/accessories:/var/lib/homebridge/accessories:rw
-      - ${VOLUME_BASE_DIRECTORY}/homebridge/backups:/var/lib/homebridge/backups:rw
-      - ${VOLUME_BASE_DIRECTORY}/homebridge/persist:/var/lib/homebridge/persist:rw
-      - ${VOLUME_BASE_DIRECTORY}/homebridge/auth.json:/var/lib/homebridge/auth.json:rw
-      - ${VOLUME_BASE_DIRECTORY}/homebridge/config.json:/var/lib/homebridge/config.json:rw
-      - ${VOLUME_BASE_DIRECTORY}/homebridge/homebridge.log:/var/lib/homebridge/homebridge.log:rw
-    environment:
-      - TZ=${TIMEZONE}
-      # - PUID=${HOMEBRIDGE_USER}
-      # - PGID=100
-#      - "PGID=${DOCKER_USER_GROUP}"
-      - HOMEBRIDGE_CONFIG_UI=1
-      - HOMEBRIDGE_CONFIG_UI_PORT=80
-#      - DSM_HOSTNAME=station
-    restart: always
+#   homebridge:
+#     image: ghcr.io/busybeaver/homelab-packages/homebridge:latest@sha256:4ef9a16ecc0b24be5dd537e6b344491d72e4cd1a353790a347c908dad426fd94
+#     container_name: homebridge
+#     networks:
+#       dockervlan:
+#         ipv4_address: "${DOCKER_VLAN_IP_PREFIX}.131"
+#     # network_mode: host
+#     dns: "${DNS_IP}"
+#     user: "${HOMEBRIDGE_USER}:${DOCKER_USER_GROUP}"
+#     cap_drop:
+#       - ALL
+#     cap_add:
+#       - NET_BIND_SERVICE
+#     read_only: true
+#     # security_opt:
+#     #   - no-new-privileges:true
+#     tmpfs:
+#       - "/tmp:rw,noexec,nosuid,nodev,size=32m,mode=660,uid=${HOMEBRIDGE_USER},gid=${DOCKER_USER_GROUP}"
+#       # s6-overlay
+#       # - "/run:rw,size=8m,uid=0"
+#     volumes:
+#       - ${VOLUME_BASE_DIRECTORY}/homebridge/accessories:/var/lib/homebridge/accessories:rw
+#       - ${VOLUME_BASE_DIRECTORY}/homebridge/backups:/var/lib/homebridge/backups:rw
+#       - ${VOLUME_BASE_DIRECTORY}/homebridge/persist:/var/lib/homebridge/persist:rw
+#       - ${VOLUME_BASE_DIRECTORY}/homebridge/auth.json:/var/lib/homebridge/auth.json:rw
+#       - ${VOLUME_BASE_DIRECTORY}/homebridge/config.json:/var/lib/homebridge/config.json:rw
+#       - ${VOLUME_BASE_DIRECTORY}/homebridge/homebridge.log:/var/lib/homebridge/homebridge.log:rw
+#     environment:
+#       - TZ=${TIMEZONE}
+#       # - PUID=${HOMEBRIDGE_USER}
+#       # - PGID=100
+# #      - "PGID=${DOCKER_USER_GROUP}"
+#       - HOMEBRIDGE_CONFIG_UI=1
+#       - HOMEBRIDGE_CONFIG_UI_PORT=80
+# #      - DSM_HOSTNAME=station
+#     restart: always
 
 #   # TODO: this needs to be put into the internal network
 #   homebridge:
@@ -162,29 +162,33 @@ services:
     #   start_period: 30s
     restart: always
 
-#   node-red:
-#     image: ghcr.io/busybeaver/homelab-packages/node-red:2023-04-08@sha256:0b0824e95e851205592a6739e165ccac7f708e505f845b580b4f46f4224f7453
-#     container_name: node-red
-#     networks:
-#       internal_network:
-#         ipv4_address: "${INTERNAL_NETWORK_IP_PREFIX}.3"
-#     expose:
-#       - "${NODE_RED_PORT}"
-#     dns: "${DNS_IP}"
-#     cap_drop:
-#       - ALL
-#     cap_add:
-#       - NET_BIND_SERVICE
-#     read_only: true
-#     tmpfs:
-#       - "/tmp:rw,noexec,nosuid,nodev,size=10m,mode=660,uid=${NODE_RED_USER},gid=${DOCKER_USER_GROUP}"
-#     volumes:
-#       - "${VOLUME_BASE_DIRECTORY}/node-red/data:/data:rw"
-#     user: "${NODE_RED_USER}:${DOCKER_USER_GROUP}"
-#     environment:
-#       - TZ=${TIMEZONE}
-#       - PORT=${NODE_RED_PORT}
-#     restart: always
+  node-red:
+    image: ghcr.io/busybeaver/homelab-packages/node-red:2023-04-08@sha256:0b0824e95e851205592a6739e165ccac7f708e505f845b580b4f46f4224f7453
+    container_name: node-red
+    networks:
+      internal_network:
+        ipv4_address: "${INTERNAL_NETWORK_IP_PREFIX}.3"
+    # expose:
+    #   - "${NODE_RED_PORT}"
+    dns: "${DNS_IP}"
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+      # to communicate with all the IOT devices
+      - NET_RAW
+    read_only: true
+    # security_opt:
+    #   - no-new-privileges:true
+    tmpfs:
+      - "/tmp:rw,noexec,nosuid,nodev,size=10m,mode=660,uid=${NODE_RED_USER},gid=${DOCKER_USER_GROUP}"
+    volumes:
+      - "${VOLUME_BASE_DIRECTORY}/node-red/data:/data:rw"
+    user: "${NODE_RED_USER}:${DOCKER_USER_GROUP}"
+    environment:
+      - TZ=${TIMEZONE}
+      - PORT=${NODE_RED_PORT}
+    restart: always
 
 #   n8n:
 #     image: n8nio/n8n:1.0.4@sha256:ec5f5a6cfbcda11d02ed9ea594735e59f8dd061338abf63da940c3710b874d0f
