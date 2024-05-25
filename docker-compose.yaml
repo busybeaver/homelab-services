@@ -68,7 +68,7 @@ services:
 #     networks:
 #       dockervlan:
 #         ipv4_address: "${DOCKER_VLAN_IP_PREFIX}.133"
-#         mac_address: "${UPTIME_HOMEBRIDGE_ADDRESS}"
+#         mac_address: "${UPTIME_HOMEBRIDGE_MAC_ADDRESS}"
 #     # network_mode: host
 #     dns: "${DNS_IP}"
 #     user: "${HOMEBRIDGE_USER}:${DOCKER_USER_GROUP}"
@@ -122,16 +122,15 @@ services:
       - "/tmp:rw,noexec,nosuid,nodev,size=64m,mode=660,uid=${UPTIME_KUMA_USER},gid=${DOCKER_USER_GROUP}"
     volumes:
       - ${VOLUME_BASE_DIRECTORY}/uptime-kuma/data:/app/data:rw
+      - ${VOLUME_BASE_DIRECTORY}/uptime-kuma/cert:/app/cert:ro
     environment:
-      # change to 433 after SSL cert setup
-      - UPTIME_KUMA_PORT=80
+      - UPTIME_KUMA_PORT=443
       # change later to proper domain with the cert
       - UPTIME_KUMA_HOST=${DOCKER_VLAN_IP_PREFIX}.132
-      #- UPTIME_KUMA_SSL_KEY=
-      #- UPTIME_KUMA_SSL_CERT=
-      #- UPTIME_KUMA_SSL_KEY_PASSPHRASE=
+      - UPTIME_KUMA_SSL_KEY=/app/cert/cert.key
+      - UPTIME_KUMA_SSL_CERT=/app/cert/cert.cer
       #- PUID=${UPTIME_KUMA_USER}
-      # - PGID=${DOCKER_USER_GROUP}
+      #- PGID=${DOCKER_USER_GROUP}
     # healthcheck:
     #   test: ["executable", "arg"]
     #   interval: 1m30s
