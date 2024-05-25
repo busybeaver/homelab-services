@@ -68,7 +68,7 @@ services:
 #     networks:
 #       dockervlan:
 #         ipv4_address: "${DOCKER_VLAN_IP_PREFIX}.133"
-#     mac_address: "${UPTIME_HOMEBRIDGE_MAC_ADDRESS}"
+#     mac_address: "${HOMEBRIDGE_MAC_ADDRESS}"
 #     # network_mode: host
 #     dns: "${DNS_IP}"
 #     user: "${HOMEBRIDGE_USER}:${DOCKER_USER_GROUP}"
@@ -145,7 +145,7 @@ services:
     networks:
       dockervlan:
         ipv4_address: "${DOCKER_VLAN_IP_PREFIX}.131"
-    mac_address: "${UPTIME_NODE_RED_ADDRESS}"
+    mac_address: "${NODE_RED_ADDRESS}"
     # expose:
     #   - "${NODE_RED_PORT}"
     dns: "${DNS_IP}"
