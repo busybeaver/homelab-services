@@ -145,7 +145,7 @@ services:
     networks:
       dockervlan:
         ipv4_address: "${DOCKER_VLAN_IP_PREFIX}.131"
-    mac_address: "${NODE_RED_ADDRESS}"
+    mac_address: "${NODE_RED_MAC_ADDRESS}"
     # expose:
     #   - "${NODE_RED_PORT}"
     dns: "${DNS_IP}"
@@ -165,7 +165,7 @@ services:
     user: "${NODE_RED_USER}:${DOCKER_USER_GROUP}"
     environment:
       - TZ=${TIMEZONE}
-      - PORT=${NODE_RED_PORT}
+      - PORT=1080
     restart: always
 
 #   n8n:
