@@ -162,6 +162,7 @@ services:
       - "/tmp:rw,noexec,nosuid,nodev,size=10m,mode=660,uid=${NODE_RED_USER},gid=${DOCKER_USER_GROUP}"
     volumes:
       - "${VOLUME_BASE_DIRECTORY}/node-red/data:/data:rw"
+      - "${VOLUME_BASE_DIRECTORY}/node-red/cert:/cert:ro"
     user: "${NODE_RED_USER}:${DOCKER_USER_GROUP}"
     environment:
       - TZ=${TIMEZONE}
