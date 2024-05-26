@@ -166,7 +166,7 @@ services:
     user: "${NODE_RED_USER}:${DOCKER_USER_GROUP}"
     environment:
       - TZ=${TIMEZONE}
-      - PORT=1080
+      - PORT=443
     restart: always
 
 #   n8n:
