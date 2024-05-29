@@ -52,6 +52,7 @@ services:
     volumes:
       - ${VOLUME_BASE_DIRECTORY}/adguard/conf:/opt/adguardhome/conf:rw
       - ${VOLUME_BASE_DIRECTORY}/adguard/work:/opt/adguardhome/work:rw
+      - ${VOLUME_BASE_DIRECTORY}/adguard/cert:/opt/adguardhome/cert:ro
     environment:
       - TZ=${TIMEZONE}
     # healthcheck:
@@ -166,7 +167,7 @@ services:
     user: "${NODE_RED_USER}:${DOCKER_USER_GROUP}"
     environment:
       - TZ=${TIMEZONE}
-      - PORT=1443
+      - PORT=443
     restart: always
 
 #   n8n:
