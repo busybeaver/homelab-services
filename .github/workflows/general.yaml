@@ -25,6 +25,6 @@ jobs:
       contents: read
       statuses: write
 
-    uses: busybeaver/homelab-shared/.github/workflows/general.yaml@9afae2c044edb5dc4b74a88549eb89bfeb91e7ed # v1.1.47
+    uses: busybeaver/homelab-shared/.github/workflows/general.yaml@7e1e7efdf5969588e761dd23ca2e3ede77530e0e # v1.1.48
     secrets:
       GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
