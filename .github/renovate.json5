@@ -4,5 +4,17 @@
     ":docker",
     "docker:pinDigests",
     "docker:enableMajor"
+  ],
+  "packageRules": [
+    // override shared config
+    {
+      "description": "Major updates from the own packages repo",
+      "matchUpdateTypes": ["major"],
+      "matchPackageNames": ["ghcr.io/busybeaver/homelab-packages/**"],
+      "stabilityDays": 5,
+      "assignees": ["busybeaver"],
+      "reviewers": ["repository-assistant[bot]"],
+      "addLabels": ["major-update"],
+    },
   ]
 }
