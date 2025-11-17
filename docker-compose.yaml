@@ -141,7 +141,7 @@ services:
     restart: always
 
   node-red:
-    image: ghcr.io/busybeaver/homelab-packages/node-red:2025.09.20@sha256:0734d33ed5c4dcd41ac1b55b0f5189af5f08cd8b9a0f0f6686b6ca0310ec241b
+    image: ghcr.io/busybeaver/homelab-packages/node-red:2025.11.17@sha256:c78a0a5203760b50bb68153c4bee5e5f9bd54422d43cf0fe09b300a417293dad
     container_name: node-red
     networks:
       dockervlan:
