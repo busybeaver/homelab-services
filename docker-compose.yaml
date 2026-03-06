@@ -55,7 +55,7 @@ services:
     environment:
       - TZ=${TIMEZONE}
     healthcheck:
-      test: ["CMD", "curl", "-k", "-f", "https://localhost:443/control/status"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "--no-check-certificate", "https://localhost:443/"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -193,7 +193,7 @@ services:
       - -c
       - |
         echo 'Testing adguard-home...'
-        curl -k -f https://adguard-home:443/control/status || exit 1
+        curl -k -f https://adguard-home:443/ || exit 1
         echo 'Testing uptime-kuma...'
         curl -k -f https://uptime-kuma:443/ || exit 1
         echo 'Testing node-red...'
