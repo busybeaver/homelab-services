@@ -31,7 +31,7 @@ jobs:
           cp ./volumes/uptime-kuma/cert/cert.cer ./volumes/adguard/cert/cert.cer
 
           # Create Node-RED settings.js with HTTPS and credentialSecret
-          cat <<SET >> ./volumes/node-red/data/settings.js
+          cat <<'SET' >> ./volumes/node-red/data/settings.js
           module.exports = {
               uiPort: 443,
               https: {
@@ -46,8 +46,14 @@ jobs:
           }
           SET
 
-          # Create AdGuardHome.yaml with TLS enabled
-          cat <<ADG >> ./volumes/adguard/conf/AdGuardHome.yaml
+          # Create AdGuardHome.yaml with TLS enabled and a dummy user to skip setup wizard
+          cat <<'ADG' >> ./volumes/adguard/conf/AdGuardHome.yaml
+          schema_version: 33
+          http:
+            address: 0.0.0.0:3000
+          users:
+            - name: ci
+              password: "$2a$10$vE.S9H9xY4G.qE9H9xY4G.qE9H9xY4G.qE9H9xY4G.qE9H9xY4G.q"
           tls:
             enabled: true
             server_name: localhost
