@@ -168,7 +168,7 @@ services:
       - TZ=${TIMEZONE}
       - PORT=443
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "--no-check-certificate", "https://localhost:443/"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "--no-check-certificate", "http://localhost:443/"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -197,7 +197,7 @@ services:
         echo 'Testing uptime-kuma...'
         curl -k -f https://uptime-kuma:443/ || exit 1
         echo 'Testing node-red...'
-        curl -k -f https://node-red:443/ || exit 1
+        curl -k -f http://node-red:443/ || exit 1
         echo 'All tests passed!'
         exit 0
 
