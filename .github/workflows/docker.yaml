@@ -1,0 +1,85 @@
+name: 'Docker CI'
+
+'on':
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  validate-and-test:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Prepare environment
+        run: |
+          mkdir -p ./volumes/adguard/conf ./volumes/adguard/work ./volumes/adguard/cert
+          mkdir -p ./volumes/uptime-kuma/data ./volumes/uptime-kuma/cert
+          mkdir -p ./volumes/node-red/data ./volumes/node-red/cert
+
+          # Generate dummy certificates for CI
+          openssl req -x509 -newkey rsa:2048 \
+            -keyout ./volumes/uptime-kuma/cert/cert.key \
+            -out ./volumes/uptime-kuma/cert/cert.cer \
+            -days 1 -nodes -subj "/CN=localhost"
+          cp ./volumes/uptime-kuma/cert/cert.key ./volumes/node-red/cert/cert.key
+          cp ./volumes/uptime-kuma/cert/cert.cer ./volumes/node-red/cert/cert.cer
+          cp ./volumes/uptime-kuma/cert/cert.key ./volumes/adguard/cert/cert.key
+          cp ./volumes/uptime-kuma/cert/cert.cer ./volumes/adguard/cert/cert.cer
+
+          # Create Node-RED settings.js with HTTPS and credentialSecret
+          cat <<'SET' >> ./volumes/node-red/data/settings.js
+          module.exports = {
+              uiPort: 443,
+              https: {
+                  key: require("fs").readFileSync("/cert/cert.key"),
+                  cert: require("fs").readFileSync("/cert/cert.cer")
+              },
+              credentialSecret: "dummy-secret-for-ci",
+              adminAuth: {
+                  type: "credentials",
+                  users: []
+              }
+          }
+          SET
+
+          # Create AdGuardHome.yaml with TLS enabled and a dummy user
+          cat <<'ADG' >> ./volumes/adguard/conf/AdGuardHome.yaml
+          schema_version: 33
+          http:
+            address: 0.0.0.0:3000
+          users:
+            - name: ci
+              password: "$2a$10$vE.S9H9xY4G.qE9H9xY4G.qE9H9xY4G.qE9H9xY4G.qE9H9xY4G.q"
+          tls:
+            enabled: true
+            server_name: localhost
+            force_https: true
+            port_https: 443
+            certificate_path: /opt/adguardhome/cert/cert.cer
+            private_key_path: /opt/adguardhome/cert/cert.key
+          ADG
+
+          chmod -R 777 ./volumes
+
+      - name: Validate Docker Compose syntax
+        run: |
+          docker compose \
+            --env-file .env.ci \
+            -f docker-compose.yaml \
+            -f docker-compose.ci.yaml \
+            config
+
+      - name: Run dynamic integration tests
+        run: |
+          docker compose \
+            --env-file .env.ci \
+            -f docker-compose.yaml \
+            -f docker-compose.ci.yaml \
+            up --abort-on-container-exit --exit-code-from test
