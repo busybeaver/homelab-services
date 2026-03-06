@@ -1,4 +1,3 @@
-version: "3.9"
 services:
   # caddy:
   #   image: ghcr.io/busybeaver/homelab-packages/caddy:2023-04-08@sha256:eb37103fa2d68c2335089933fbebffdbaf56bbfb949a2abb93c37c47fbb0cf7d
@@ -55,12 +54,12 @@ services:
       - ${VOLUME_BASE_DIRECTORY}/adguard/cert:/opt/adguardhome/cert:ro
     environment:
       - TZ=${TIMEZONE}
-    # healthcheck:
-    #   test: ["executable", "arg"]
-    #   interval: 1m30s
-    #   timeout: 30s
-    #   retries: 5
-    #   start_period: 30s
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/control/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
     restart: always
 
 #   homebridge:
@@ -132,12 +131,12 @@ services:
       - UPTIME_KUMA_SSL_CERT=/app/cert/cert.cer
       #- PUID=${UPTIME_KUMA_USER}
       #- PGID=${DOCKER_USER_GROUP}
-    # healthcheck:
-    #   test: ["executable", "arg"]
-    #   interval: 1m30s
-    #   timeout: 30s
-    #   retries: 5
-    #   start_period: 30s
+    healthcheck:
+      test: ["CMD", "node", "extra/healthcheck.js"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
     restart: always
 
   node-red:
@@ -168,7 +167,37 @@ services:
     environment:
       - TZ=${TIMEZONE}
       - PORT=443
+    healthcheck:
+      test: ["CMD", "curl", "-k", "-f", "https://localhost:443/"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
     restart: always
+
+  test:
+    image: alpine:latest
+    networks:
+      - dockervlan
+    depends_on:
+      adguard-home:
+        condition: service_healthy
+      uptime-kuma:
+        condition: service_healthy
+      node-red:
+        condition: service_healthy
+    command:
+      - /bin/sh
+      - -c
+      - |
+        apk add --no-cache curl
+        echo 'Testing adguard-home...'
+        curl -f http://adguard-home:80/control/status || exit 1
+        echo 'Testing uptime-kuma...'
+        curl -k -f https://uptime-kuma:443/ || exit 1
+        echo 'Testing node-red...'
+        curl -k -f https://node-red:443/ || exit 1
+        echo 'All tests passed!'
 
 #   n8n:
 #     image: n8nio/n8n:1.0.4@sha256:ec5f5a6cfbcda11d02ed9ea594735e59f8dd061338abf63da940c3710b874d0f

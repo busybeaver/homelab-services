@@ -1,0 +1,26 @@
+name: 'Docker CI'
+
+'on':
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  validate-and-test:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate Docker Compose syntax
+        run: |
+          docker compose --env-file .env.ci -f docker-compose.yaml -f docker-compose.ci.yaml config
+
+      - name: Run dynamic integration tests
+        run: |
+          docker compose --env-file .env.ci -f docker-compose.yaml -f docker-compose.ci.yaml up --abort-on-container-exit --exit-code-from test
