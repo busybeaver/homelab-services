@@ -28,6 +28,22 @@ jobs:
           cp ./volumes/uptime-kuma/cert/cert.key ./volumes/node-red/cert/cert.key
           cp ./volumes/uptime-kuma/cert/cert.cer ./volumes/node-red/cert/cert.cer
 
+          # Create Node-RED settings.js with HTTPS and credentialSecret
+          cat <<SET >> ./volumes/node-red/data/settings.js
+          module.exports = {
+              uiPort: 443,
+              https: {
+                  key: require("fs").readFileSync("/cert/cert.key"),
+                  cert: require("fs").readFileSync("/cert/cert.cer")
+              },
+              credentialSecret: "dummy-secret-for-ci",
+              adminAuth: {
+                  type: "credentials",
+                  users: []
+              }
+          }
+          SET
+
           chmod -R 777 ./volumes
 
       - name: Validate Docker Compose syntax
