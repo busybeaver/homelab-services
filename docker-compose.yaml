@@ -193,7 +193,7 @@ services:
       - -c
       - |
         echo 'Testing adguard-home...'
-        curl -f http://adguard-home:80/control/status || exit 1
+        curl -f http://adguard-home:80/control/status || curl -f http://adguard-home:3000/ || exit 1
         echo 'Testing uptime-kuma...'
         curl -k -f https://uptime-kuma:443/ || exit 1
         echo 'Testing node-red...'

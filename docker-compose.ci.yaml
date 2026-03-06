@@ -1,13 +1,14 @@
 services:
   adguard-home:
     user: "0:0"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/"]
     networks:
       dockervlan:
         ipv4_address: 172.20.0.130
     mac_address: ""
 
   uptime-kuma:
-    user: "0:0"
     environment:
       UPTIME_KUMA_HOST: 172.20.0.132
     networks:
@@ -16,7 +17,6 @@ services:
     mac_address: ""
 
   node-red:
-    user: "0:0"
     networks:
       dockervlan:
         ipv4_address: 172.20.0.131
