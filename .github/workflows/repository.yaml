@@ -1,6 +1,6 @@
 name: "Repository CI"
 
-on:
+'on':
   # run on pushes to main
   push:
     branches:
@@ -21,8 +21,19 @@ on:
     branches:
       - main
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   repository:
+    permissions:
+      contents: read
+    # Only run for the repository owner or on non-pull_request_target events
+    # to protect secrets
+    if: >
+      github.event_name != 'pull_request_target' ||
+      github.event.pull_request.head.repo.full_name == github.repository
     uses: busybeaver/homelab-shared/.github/workflows/repository.yaml@e5bc968880ee2f22fb8b5f4b7191777cebc5fb2c # v1.1.95
     secrets:
       REPOSITORY_ASSISTANT_APP_ID: ${{ secrets.REPOSITORY_ASSISTANT_APP_ID }}
