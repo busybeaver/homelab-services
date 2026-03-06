@@ -22,6 +22,12 @@ jobs:
           mkdir -p ./volumes/adguard/conf ./volumes/adguard/work ./volumes/adguard/cert
           mkdir -p ./volumes/uptime-kuma/data ./volumes/uptime-kuma/cert
           mkdir -p ./volumes/node-red/data ./volumes/node-red/cert
+
+          # Generate dummy certificates for CI
+          openssl req -x509 -newkey rsa:2048 -keyout ./volumes/uptime-kuma/cert/cert.key -out ./volumes/uptime-kuma/cert/cert.cer -days 1 -nodes -subj "/CN=localhost"
+          cp ./volumes/uptime-kuma/cert/cert.key ./volumes/node-red/cert/cert.key
+          cp ./volumes/uptime-kuma/cert/cert.cer ./volumes/node-red/cert/cert.cer
+
           chmod -R 777 ./volumes
 
       - name: Validate Docker Compose syntax
