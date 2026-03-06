@@ -1,4 +1,4 @@
-name: "Repository CI"
+content = """name: "Repository CI"
 
 on:
   # run on pushes to main
@@ -37,3 +37,6 @@ jobs:
     secrets:
       REPOSITORY_ASSISTANT_APP_ID: ${{ secrets.REPOSITORY_ASSISTANT_APP_ID }}
       REPOSITORY_ASSISTANT_PRIVATE_KEY: ${{ secrets.REPOSITORY_ASSISTANT_PRIVATE_KEY }}
+"""
+with open(".github/workflows/repository.yaml", "w") as f:
+    f.write(content)
