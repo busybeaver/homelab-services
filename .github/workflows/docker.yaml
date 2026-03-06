@@ -19,8 +19,16 @@ jobs:
 
       - name: Validate Docker Compose syntax
         run: |
-          docker compose --env-file .env.ci -f docker-compose.yaml -f docker-compose.ci.yaml config
+          docker compose \
+            --env-file .env.ci \
+            -f docker-compose.yaml \
+            -f docker-compose.ci.yaml \
+            config
 
       - name: Run dynamic integration tests
         run: |
-          docker compose --env-file .env.ci -f docker-compose.yaml -f docker-compose.ci.yaml up --abort-on-container-exit --exit-code-from test
+          docker compose \
+            --env-file .env.ci \
+            -f docker-compose.yaml \
+            -f docker-compose.ci.yaml \
+            up --abort-on-container-exit --exit-code-from test
