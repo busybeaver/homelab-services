@@ -19,7 +19,10 @@ jobs:
 
       - name: Prepare environment
         run: |
-          mkdir -p ./volumes
+          mkdir -p ./volumes/adguard/conf ./volumes/adguard/work ./volumes/adguard/cert
+          mkdir -p ./volumes/uptime-kuma/data ./volumes/uptime-kuma/cert
+          mkdir -p ./volumes/node-red/data ./volumes/node-red/cert
+          chmod -R 777 ./volumes
 
       - name: Validate Docker Compose syntax
         run: |
