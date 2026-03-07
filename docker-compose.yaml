@@ -49,10 +49,6 @@ services:
     <<: *hardened-security
     cap_add:
       - NET_BIND_SERVICE
-      - CHOWN
-      - FOWNER
-      - DAC_OVERRIDE
-      - DAC_READ_SEARCH
     # read_only: true
     # security_opt:
     #   - no-new-privileges:true

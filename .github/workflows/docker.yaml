@@ -67,6 +67,8 @@ jobs:
           ADG
 
           chmod -R 777 ./volumes
+          chmod -R 700 ./volumes/adguard/work
+          chmod 600 ./volumes/adguard/conf/AdGuardHome.yaml
 
       - name: Validate Docker Compose syntax
         run: |
