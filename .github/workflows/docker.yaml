@@ -67,7 +67,7 @@ jobs:
           ADG
 
           sudo chown -R 1000:100 ./volumes
-          chmod -R 777 ./volumes
+          sudo chmod -R 777 ./volumes
 
       - name: Validate Docker Compose syntax
         run: |
