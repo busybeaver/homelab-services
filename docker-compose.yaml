@@ -24,7 +24,6 @@ services:
   # - ALL
   # cap_add:
   # - NET_BIND_SERVICE
-  # read_only: true
   # tmpfs:
   # - "/tmp:rw,noexec,nosuid,nodev,size=10m,mode=660,uid=${CADDY_USER},gid=${DOCKER_USER_GROUP}"
   # volumes:
@@ -49,9 +48,6 @@ services:
     <<: *hardened-security
     cap_add:
       - NET_BIND_SERVICE
-    # read_only: true
-    # security_opt:
-    #   - no-new-privileges:true
     tmpfs:
       - "/tmp:rw,noexec,nosuid,nodev,size=64m,mode=660,uid=${ADGUARD_USER},gid=${DOCKER_USER_GROUP}"
     volumes:
@@ -61,7 +57,7 @@ services:
     environment:
       - TZ=${TIMEZONE}
     healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider --no-check-certificate https://localhost:443/ || exit 1"]
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 -qO- --no-check-certificate https://127.0.0.1:443/ || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -82,7 +78,6 @@ services:
   # - ALL
   # cap_add:
   # - NET_BIND_SERVICE
-  # read_only: true
   # # security_opt:
   # #   - no-new-privileges:true
   # tmpfs:
@@ -120,9 +115,6 @@ services:
       - NET_BIND_SERVICE
       # health checks such as pings
       - NET_RAW
-    # read_only: true
-    # security_opt:
-    #   - no-new-privileges:true
     tmpfs:
       - "/tmp:rw,noexec,nosuid,nodev,size=64m,mode=660,uid=${UPTIME_KUMA_USER},gid=${DOCKER_USER_GROUP}"
     volumes:
@@ -153,9 +145,6 @@ services:
       - NET_BIND_SERVICE
       # to communicate with all the IOT devices
       - NET_RAW
-    # read_only: true
-    # security_opt:
-    #   - no-new-privileges:true
     tmpfs:
       - "/tmp:rw,noexec,nosuid,nodev,size=10m,mode=660,uid=${NODE_RED_USER},gid=${DOCKER_USER_GROUP}"
     volumes:
@@ -166,11 +155,11 @@ services:
       - TZ=${TIMEZONE}
       - PORT=443
     healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider --no-check-certificate https://localhost:443/ || exit 1"]
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 -qO- --no-check-certificate https://127.0.0.1:443/ || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 5
-      start_period: 30s
+      start_period: 60s
     restart: always
 
   # n8n:
@@ -189,7 +178,6 @@ services:
   # - CHOWN
   # - SETUID
   # - SETGID
-  # read_only: true
   # tmpfs:
   # - "/tmp:rw,noexec,nosuid,nodev,size=10m,mode=660,uid=${N8N_USER},gid=${DOCKER_USER_GROUP}"
   # volumes:
