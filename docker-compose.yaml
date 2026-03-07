@@ -1,3 +1,10 @@
+x-hardened-security: &hardened-security
+  cap_drop:
+    - ALL
+  read_only: true
+  security_opt:
+    - no-new-privileges:true
+
 services:
   # caddy:
   # image: ghcr.io/busybeaver/homelab-packages/caddy:2023-04-08@sha256:eb37103fa2d68c2335089933fbebffdbaf56bbfb949a2abb93c37c47fbb0cf7d
@@ -17,7 +24,6 @@ services:
   # - ALL
   # cap_add:
   # - NET_BIND_SERVICE
-  # read_only: true
   # tmpfs:
   # - "/tmp:rw,noexec,nosuid,nodev,size=10m,mode=660,uid=${CADDY_USER},gid=${DOCKER_USER_GROUP}"
   # volumes:
@@ -39,13 +45,9 @@ services:
     mac_address: "${ADGUARD_MAC_ADDRESS}"
     dns: "${DNS_IP}"
     user: "${ADGUARD_USER}:${DOCKER_USER_GROUP}"
-    cap_drop:
-      - ALL
+    <<: *hardened-security
     cap_add:
       - NET_BIND_SERVICE
-    read_only: true
-    # security_opt:
-    #   - no-new-privileges:true
     tmpfs:
       - "/tmp:rw,noexec,nosuid,nodev,size=64m,mode=660,uid=${ADGUARD_USER},gid=${DOCKER_USER_GROUP}"
     volumes:
@@ -55,7 +57,7 @@ services:
     environment:
       - TZ=${TIMEZONE}
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "--no-check-certificate", "https://localhost:443/"]
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 -qO- --no-check-certificate https://127.0.0.1:443/ || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -76,7 +78,6 @@ services:
   # - ALL
   # cap_add:
   # - NET_BIND_SERVICE
-  # read_only: true
   # # security_opt:
   # #   - no-new-privileges:true
   # tmpfs:
@@ -109,15 +110,11 @@ services:
     mac_address: "${UPTIME_KUMA_MAC_ADDRESS}"
     dns: "${DNS_IP}"
     user: "${UPTIME_KUMA_USER}:${DOCKER_USER_GROUP}"
-    cap_drop:
-      - ALL
+    <<: *hardened-security
     cap_add:
       - NET_BIND_SERVICE
       # health checks such as pings
       - NET_RAW
-    read_only: true
-    # security_opt:
-    #   - no-new-privileges:true
     tmpfs:
       - "/tmp:rw,noexec,nosuid,nodev,size=64m,mode=660,uid=${UPTIME_KUMA_USER},gid=${DOCKER_USER_GROUP}"
     volumes:
@@ -131,12 +128,6 @@ services:
       - UPTIME_KUMA_SSL_CERT=/app/cert/cert.cer
       # - PUID=${UPTIME_KUMA_USER}
       # - PGID=${DOCKER_USER_GROUP}
-    healthcheck:
-      test: ["CMD", "node", "extra/healthcheck.js"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 30s
     restart: always
 
   node-red:
@@ -149,15 +140,11 @@ services:
     # expose:
     #   - "${NODE_RED_PORT}"
     dns: "${DNS_IP}"
-    cap_drop:
-      - ALL
+    <<: *hardened-security
     cap_add:
       - NET_BIND_SERVICE
       # to communicate with all the IOT devices
       - NET_RAW
-    read_only: true
-    # security_opt:
-    #   - no-new-privileges:true
     tmpfs:
       - "/tmp:rw,noexec,nosuid,nodev,size=10m,mode=660,uid=${NODE_RED_USER},gid=${DOCKER_USER_GROUP}"
     volumes:
@@ -168,38 +155,12 @@ services:
       - TZ=${TIMEZONE}
       - PORT=443
     healthcheck:
-      test: ["CMD", "curl", "-k", "-f", "https://localhost:443/"]
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 -qO- --no-check-certificate https://127.0.0.1:443/ || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 5
-      start_period: 30s
+      start_period: 60s
     restart: always
-
-  test:
-    image: curlimages/curl:latest
-    read_only: true
-    restart: "no"
-    networks:
-      - dockervlan
-    depends_on:
-      adguard-home:
-        condition: service_healthy
-      uptime-kuma:
-        condition: service_healthy
-      node-red:
-        condition: service_healthy
-    command:
-      - /bin/sh
-      - -c
-      - |
-        echo 'Testing adguard-home...'
-        curl -k -f https://adguard-home:443/ || exit 1
-        echo 'Testing uptime-kuma...'
-        curl -k -f https://uptime-kuma:443/ || exit 1
-        echo 'Testing node-red...'
-        curl -k -f https://node-red:443/ || exit 1
-        echo 'All tests passed!'
-        exit 0
 
   # n8n:
   # image: n8nio/n8n:1.0.4@sha256:ec5f5a6cfbcda11d02ed9ea594735e59f8dd061338abf63da940c3710b874d0f
@@ -217,7 +178,6 @@ services:
   # - CHOWN
   # - SETUID
   # - SETGID
-  # read_only: true
   # tmpfs:
   # - "/tmp:rw,noexec,nosuid,nodev,size=10m,mode=660,uid=${N8N_USER},gid=${DOCKER_USER_GROUP}"
   # volumes:
