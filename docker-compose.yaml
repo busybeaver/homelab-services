@@ -166,7 +166,7 @@ services:
       - TZ=${TIMEZONE}
       - PORT=443
     healthcheck:
-      test: ["CMD-SHELL", "curl -k -f https://localhost:443/ || exit 1"]
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider --no-check-certificate https://localhost:443/ || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 5
