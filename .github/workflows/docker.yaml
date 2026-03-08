@@ -34,7 +34,7 @@ jobs:
           cp ./volumes/uptime-kuma/cert/cert.cer ./volumes/adguard/cert/cert.cer
 
           # Create Node-RED settings.js with HTTPS and credentialSecret
-          cat <<'SET' >> ./volumes/node-red/data/settings.js
+          cat <<'SET' > ./volumes/node-red/data/settings.js
           module.exports = {
               uiPort: 443,
               https: {
@@ -50,7 +50,7 @@ jobs:
           SET
 
           # Create AdGuardHome.yaml with TLS enabled and a dummy user
-          cat <<'ADG' >> ./volumes/adguard/conf/AdGuardHome.yaml
+          cat <<'ADG' > ./volumes/adguard/conf/AdGuardHome.yaml
           schema_version: 33
           http:
             address: 0.0.0.0:3000
@@ -66,7 +66,8 @@ jobs:
             private_key_path: /opt/adguardhome/cert/cert.key
           ADG
 
-          chmod -R 777 ./volumes
+          sudo chown -R 1000:100 ./volumes
+          sudo chmod -R 777 ./volumes
 
       - name: Validate Docker Compose syntax
         run: |
