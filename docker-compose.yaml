@@ -24,7 +24,6 @@ x-node-red-security: &node-red-security
     net.ipv4.ip_unprivileged_port_start: 443
 
 
-
 services:
   # caddy:
   # image: ghcr.io/busybeaver/homelab-packages/caddy:2023-04-08@sha256:eb37103fa2d68c2335089933fbebffdbaf56bbfb949a2abb93c37c47fbb0cf7d
@@ -209,14 +208,14 @@ services:
   # - GENERIC_TIMEZONE=${TIMEZONE}
   # - TZ=${TIMEZONE}
   # - DB_TYPE=sqlite
-#       - N8N_PORT=${N8N_PORT}
-#       - N8N_DIAGNOSTICS_ENABLED=false
-#       #- N8N_BASIC_AUTH_USER_FILE=
-#       #- N8N_BASIC_AUTH_PASSWORD_FILE=
-#       #- N8N_BASIC_AUTH_HASH=true
-#       # - N8N_EDITOR_BASE_URL=${N8N_URL}
-#       # - WEBHOOK_URL=${N8N_URL}
-#     restart: always
+  #       - N8N_PORT=${N8N_PORT}
+  #       - N8N_DIAGNOSTICS_ENABLED=false
+  #       #- N8N_BASIC_AUTH_USER_FILE=
+  #       #- N8N_BASIC_AUTH_PASSWORD_FILE=
+  #       #- N8N_BASIC_AUTH_HASH=true
+  #       # - N8N_EDITOR_BASE_URL=${N8N_URL}
+  #       # - WEBHOOK_URL=${N8N_URL}
+  #     restart: always
 
 networks:
   dockervlan:
