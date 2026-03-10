@@ -1,9 +1,29 @@
-x-hardened-security: &hardened-security
+x-adguard-security: &adguard-security
   cap_drop:
     - ALL
   read_only: true
   security_opt:
     - no-new-privileges:true
+
+x-uptime-kuma-security: &uptime-kuma-security
+  cap_drop:
+    - ALL
+  read_only: true
+  security_opt:
+    - no-new-privileges:true
+  sysctls:
+    net.ipv4.ip_unprivileged_port_start: 443
+
+x-node-red-security: &node-red-security
+  cap_drop:
+    - ALL
+  read_only: true
+  security_opt:
+    - no-new-privileges:true
+  sysctls:
+    net.ipv4.ip_unprivileged_port_start: 443
+
+
 
 services:
   # caddy:
@@ -45,7 +65,7 @@ services:
     mac_address: "${ADGUARD_MAC_ADDRESS}"
     dns: "${DNS_IP}"
     user: "${ADGUARD_USER}:${DOCKER_USER_GROUP}"
-    <<: *hardened-security
+    <<: *adguard-security
     cap_add:
       - NET_BIND_SERVICE
     tmpfs:
@@ -110,7 +130,7 @@ services:
     mac_address: "${UPTIME_KUMA_MAC_ADDRESS}"
     dns: "${DNS_IP}"
     user: "${UPTIME_KUMA_USER}:${DOCKER_USER_GROUP}"
-    <<: *hardened-security
+    <<: *uptime-kuma-security
     cap_add:
       - NET_BIND_SERVICE
       # health checks such as pings
@@ -140,7 +160,7 @@ services:
     # expose:
     #   - "${NODE_RED_PORT}"
     dns: "${DNS_IP}"
-    <<: *hardened-security
+    <<: *node-red-security
     cap_add:
       - NET_BIND_SERVICE
       # to communicate with all the IOT devices
