@@ -116,7 +116,7 @@ services:
       # health checks such as pings
       - NET_RAW
     tmpfs:
-      - "/tmp:rw,noexec,nosuid,nodev,size=64m,mode=660,uid=${UPTIME_KUMA_USER},gid=${DOCKER_USER_GROUP}"
+      - "/tmp:rw,noexec,nosuid,nodev,size=256m,mode=660,uid=${UPTIME_KUMA_USER},gid=${DOCKER_USER_GROUP}"
     volumes:
       - ${VOLUME_BASE_DIRECTORY}/uptime-kuma/data:/app/data:rw
       - ${VOLUME_BASE_DIRECTORY}/uptime-kuma/cert:/app/cert:ro
