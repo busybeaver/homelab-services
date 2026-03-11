@@ -102,7 +102,7 @@ services:
   # restart: always
 
   uptime-kuma:
-    image: ghcr.io/busybeaver/homelab-packages/uptime-kuma:2024-01-18@sha256:6596fe773dd151c7cfa7f79bd968dedb1e201b5240119e54fc2d92761e2420cd
+    image: ghcr.io/busybeaver/homelab-packages/uptime-kuma:2026.03.11@sha256:66bbce18a4bad06af3c133ae3555f2fb5e3d00c0d547970183fff4cfb575996f
     container_name: uptime-kuma
     networks:
       dockervlan:
@@ -131,7 +131,7 @@ services:
     restart: always
 
   node-red:
-    image: ghcr.io/busybeaver/homelab-packages/node-red:2025.11.17@sha256:c78a0a5203760b50bb68153c4bee5e5f9bd54422d43cf0fe09b300a417293dad
+    image: ghcr.io/busybeaver/homelab-packages/node-red:2026.03.11@sha256:59308e589dbac32b61dce43d0c9a2167c05361c31e6e1e6d21acd4679ea781ef
     container_name: node-red
     networks:
       dockervlan:
