@@ -112,10 +112,9 @@ services:
     user: "${UPTIME_KUMA_USER}:${DOCKER_USER_GROUP}"
     <<: *hardened-security
     cap_add:
+      - NET_BIND_SERVICE
       # health checks such as pings
       - NET_RAW
-    sysctls:
-      - net.ipv4.ip_unprivileged_port_start=443
     tmpfs:
       - "/tmp:rw,noexec,nosuid,nodev,size=64m,mode=660,uid=${UPTIME_KUMA_USER},gid=${DOCKER_USER_GROUP}"
     volumes:
@@ -143,10 +142,9 @@ services:
     dns: "${DNS_IP}"
     <<: *hardened-security
     cap_add:
+      - NET_BIND_SERVICE
       # to communicate with all the IOT devices
       - NET_RAW
-    sysctls:
-      - net.ipv4.ip_unprivileged_port_start=443
     tmpfs:
       - "/tmp:rw,noexec,nosuid,nodev,size=10m,mode=660,uid=${NODE_RED_USER},gid=${DOCKER_USER_GROUP}"
     volumes:
