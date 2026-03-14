@@ -7,7 +7,7 @@ services:
 
   uptime-kuma:
     environment:
-      UPTIME_KUMA_HOST: 0.0.0.0
+      UPTIME_KUMA_HOST: "0.0.0.0"
     networks:
       dockervlan:
         ipv4_address: 172.20.0.132
