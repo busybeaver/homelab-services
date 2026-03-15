@@ -66,8 +66,8 @@ jobs:
             private_key_path: /opt/adguardhome/cert/cert.key
           ADG
 
-          sudo chown -R 1000:100 ./volumes
-          sudo chmod -R 777 ./volumes
+          sudo chown -R 1001:2000 ./volumes/adguard && sudo chown -R 1002:2000 ./volumes/uptime-kuma && sudo chown -R 1003:2000 ./volumes/node-red
+          sudo chmod -R 775 ./volumes
 
       - name: Validate Docker Compose syntax
         run: |
