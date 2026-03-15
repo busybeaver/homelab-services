@@ -92,7 +92,7 @@ services:
   # - ${VOLUME_BASE_DIRECTORY}/homebridge/config.json:/var/lib/homebridge/config.json:rw
   # - ${VOLUME_BASE_DIRECTORY}/homebridge/homebridge.log:/var/lib/homebridge/homebridge.log:rw
   # environment:
-      TZ: "${TIMEZONE}"
+  # - TZ=${TIMEZONE}
   # # - PUID=${HOMEBRIDGE_USER}
   # # - PGID=100
   # #      - "PGID=${DOCKER_USER_GROUP}"
@@ -129,6 +129,12 @@ services:
       # - PUID=${UPTIME_KUMA_USER}
       # - PGID=${DOCKER_USER_GROUP}
     restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 -qO- --no-check-certificate https://127.0.0.1:443/ || wget --no-verbose --tries=1 -qO- --no-check-certificate http://127.0.0.1:443/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
 
   node-red:
     image: ghcr.io/busybeaver/homelab-packages/node-red:2026.03.11@sha256:59308e589dbac32b61dce43d0c9a2167c05361c31e6e1e6d21acd4679ea781ef
@@ -187,7 +193,7 @@ services:
   # # https://github.com/n8n-io/n8n/blob/5c65a73cc21ac4348eaae6b6b010980ff789cefe/docker/images/n8n/docker-entrypoint.sh
   # environment:
   # - GENERIC_TIMEZONE=${TIMEZONE}
-      TZ: "${TIMEZONE}"
+  # - TZ=${TIMEZONE}
   # - DB_TYPE=sqlite
 #       - N8N_PORT=${N8N_PORT}
 #       - N8N_DIAGNOSTICS_ENABLED=false
