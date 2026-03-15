@@ -42,10 +42,27 @@ services:
       - -c
       - |
         set -e
-        for service in adguard-home uptime-kuma node-red; do
-          echo "Testing $${service}..."
-          curl --retry 10 --retry-delay 5 --retry-connrefused -k -f "https://$${service}:443/" || (echo "$${service} test failed" && exit 1)
-        done
+        test_service() {
+          local name=$$1
+          local url=$$2
+          local pattern=$$3
+          echo "Testing $${name} at $${url}..."
+          response=$$(curl --retry 5 --retry-delay 5 --retry-connrefused -k -s -f "$${url}")
+          if [ $$? -eq 0 ]; then
+            if echo "$${response}" | grep -q "$${pattern}"; then
+              echo "$${name} test passed!"
+            else
+              echo "$${name} test failed: response did not match pattern '$${pattern}'"
+              exit 1
+            fi
+          else
+            echo "$${name} test failed: could not reach $${url}"
+            exit 1
+          fi
+        }
+        test_service "adguard-home" "https://adguard-home:443/" "AdGuard Home"
+        test_service "uptime-kuma" "https://uptime-kuma:443/" "Uptime Kuma"
+        test_service "node-red" "https://node-red:443/" "Node-RED"
         echo "All tests passed!"
 
 networks:
