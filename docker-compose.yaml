@@ -4,8 +4,6 @@ x-hardened-security: &hardened-security
   read_only: true
   security_opt:
     - no-new-privileges:true
-  sysctls:
-    - net.ipv4.ip_unprivileged_port_start=0
 
 services:
   # caddy:
