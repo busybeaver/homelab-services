@@ -123,11 +123,11 @@ services:
     environment:
       UPTIME_KUMA_PORT: "443"
       # change later to proper domain with the cert
-      UPTIME_KUMA_HOST: "0.0.0.0"
+      UPTIME_KUMA_HOST=${DOCKER_VLAN_IP_PREFIX}.132
       UPTIME_KUMA_SSL_KEY: "/app/cert/cert.key"
       UPTIME_KUMA_SSL_CERT: "/app/cert/cert.cer"
-      # - PUID=${UPTIME_KUMA_USER}
-      # - PGID=${DOCKER_USER_GROUP}
+      # PUID=${UPTIME_KUMA_USER}
+      # PGID=${DOCKER_USER_GROUP}
     restart: always
     healthcheck:
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 -qO- --no-check-certificate https://127.0.0.1:443/ || wget --no-verbose --tries=1 -qO- --no-check-certificate http://127.0.0.1:443/ || exit 1"]
