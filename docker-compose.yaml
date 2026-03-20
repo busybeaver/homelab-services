@@ -123,7 +123,7 @@ services:
     environment:
       UPTIME_KUMA_PORT: "443"
       # change later to proper domain with the cert
-      UPTIME_KUMA_HOST=${DOCKER_VLAN_IP_PREFIX}.132
+      UPTIME_KUMA_HOST: "${DOCKER_VLAN_IP_PREFIX}.132"
       UPTIME_KUMA_SSL_KEY: "/app/cert/cert.key"
       UPTIME_KUMA_SSL_CERT: "/app/cert/cert.cer"
       # PUID=${UPTIME_KUMA_USER}
