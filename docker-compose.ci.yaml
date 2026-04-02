@@ -12,6 +12,13 @@ services:
       dockervlan:
         ipv4_address: 172.20.0.132
     mac_address: ""
+    healthcheck:
+      # Use both HTTP and HTTPS to handle the transition during setup
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 -qO- --no-check-certificate http://127.0.0.1:443/ || wget --no-verbose --tries=1 -qO- --no-check-certificate https://127.0.0.1:443/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
 
   node-red:
     networks:
