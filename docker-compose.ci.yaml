@@ -13,8 +13,8 @@ services:
         ipv4_address: 172.20.0.132
     mac_address: ""
     healthcheck:
-      # Use both HTTP and HTTPS to handle the transition during setup
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 -qO- --no-check-certificate http://127.0.0.1:443/ || wget --no-verbose --tries=1 -qO- --no-check-certificate https://127.0.0.1:443/ || exit 1"]
+      # Use node as a healthcheck because wget/curl might not be present in the image
+      test: ["CMD-SHELL", "node -e 'const https = require(\"https\"); const http = require(\"http\"); const check = (url, provider) => new Promise((resolve, reject) => { provider.get(url, { rejectUnauthorized: false }, (res) => { if (res.statusCode === 200 || res.statusCode === 302) resolve(); else reject(); }).on(\"error\", reject); }); Promise.any([check(\"http://127.0.0.1:443/\", http), check(\"https://127.0.0.1:443/\", https)]).then(() => process.exit(0)).catch(() => process.exit(1));'"]
       interval: 30s
       timeout: 10s
       retries: 5
