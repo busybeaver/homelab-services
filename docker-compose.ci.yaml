@@ -31,7 +31,7 @@ services:
     restart: "no"
     networks:
       dockervlan:
-        ipv4_address: 172.20.0.133
+        ipv4_address: 192.168.1.133
     depends_on:
       adguard-home:
         condition: service_healthy
@@ -57,4 +57,4 @@ networks:
       parent: ""
     ipam:
       config:
-        - subnet: 172.20.0.0/24
+        - subnet: 192.168.1.0/24
