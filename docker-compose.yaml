@@ -3,7 +3,7 @@ x-hardened-security: &hardened-security
     - ALL
   read_only: true
   security_opt:
-    - no-new-privileges:true
+    - "no-new-privileges:${NO_NEW_PRIVILEGES:-true}"
   sysctls:
     net.ipv4.ip_unprivileged_port_start: 0
 
@@ -56,6 +56,7 @@ services:
     <<: *hardened-security
     tmpfs:
       - "/tmp:rw,noexec,nosuid,nodev,size=64m,mode=660,uid=${ADGUARD_USER},gid=${DOCKER_USER_GROUP}"
+      - "/run:rw,noexec,nosuid,nodev,size=1m,mode=660,uid=${ADGUARD_USER},gid=${DOCKER_USER_GROUP}"
     volumes:
       - ${VOLUME_BASE_DIRECTORY}/adguard/conf:/opt/adguardhome/conf:rw
       - ${VOLUME_BASE_DIRECTORY}/adguard/work:/opt/adguardhome/work:rw
@@ -64,7 +65,7 @@ services:
       - TZ=${TIMEZONE}
     logging: *default-logging
     healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 -qO- --no-check-certificate https://127.0.0.1:443/ || exit 1"]
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 -qO- --no-check-certificate https://127.0.0.1:443/ | grep -q 'AdGuard Home' || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -123,6 +124,7 @@ services:
       - NET_RAW
     tmpfs:
       - "/tmp:rw,noexec,nosuid,nodev,size=256m,mode=660,uid=${UPTIME_KUMA_USER},gid=${DOCKER_USER_GROUP}"
+      - "/run:rw,noexec,nosuid,nodev,size=1m,mode=660,uid=${UPTIME_KUMA_USER},gid=${DOCKER_USER_GROUP}"
     volumes:
       - ${VOLUME_BASE_DIRECTORY}/uptime-kuma/data:/app/data:rw
       - ${VOLUME_BASE_DIRECTORY}/uptime-kuma/cert:/app/cert:ro
@@ -151,8 +153,6 @@ services:
     cap_add:
       # to communicate with all the IOT devices
       - NET_RAW
-    tmpfs:
-      - "/tmp:rw,noexec,nosuid,nodev,size=10m,mode=660,uid=${NODE_RED_USER},gid=${DOCKER_USER_GROUP}"
     volumes:
       - "${VOLUME_BASE_DIRECTORY}/node-red/data:/data:rw"
       - "${VOLUME_BASE_DIRECTORY}/node-red/cert:/cert:ro"
@@ -161,6 +161,15 @@ services:
       - TZ=${TIMEZONE}
       - PORT=443
     logging: *default-logging
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 -qO- --no-check-certificate https://127.0.0.1:443/ | grep -q 'Node-RED' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    tmpfs:
+      - "/tmp:rw,noexec,nosuid,nodev,size=10m,mode=660,uid=${NODE_RED_USER},gid=${DOCKER_USER_GROUP}"
+      - "/run:rw,noexec,nosuid,nodev,size=1m,mode=660,uid=${NODE_RED_USER},gid=${DOCKER_USER_GROUP}"
     restart: always
 
   # n8n:
