@@ -8,6 +8,7 @@ services:
   uptime-kuma:
     environment:
       UPTIME_KUMA_HOST: 172.20.0.132
+      NODE_TLS_REJECT_UNAUTHORIZED: "0"
     networks:
       dockervlan:
         ipv4_address: 172.20.0.132
@@ -42,10 +43,12 @@ services:
       - -c
       - |
         set -e
-        for service in adguard-home uptime-kuma node-red; do
-          echo "Testing $${service}..."
-          curl --retry 10 --retry-delay 5 --retry-connrefused -k -f "https://$${service}:443/" || (echo "$${service} test failed" && exit 1)
-        done
+        echo "Testing adguard-home..."
+        curl --retry 10 --retry-delay 5 --retry-connrefused -k -f "https://adguard-home:443/" | grep -q "AdGuard Home" || (echo "adguard-home test failed" && exit 1)
+        echo "Testing uptime-kuma..."
+        curl --retry 10 --retry-delay 5 --retry-connrefused -k -f "https://uptime-kuma:443/" | grep -q "Uptime Kuma" || (echo "uptime-kuma test failed" && exit 1)
+        echo "Testing node-red..."
+        curl --retry 10 --retry-delay 5 --retry-connrefused -k -f "https://node-red:443/" | grep -q "Node-RED" || (echo "node-red test failed" && exit 1)
         echo "All tests passed!"
 
 networks:
