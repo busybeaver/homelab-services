@@ -14,16 +14,18 @@ name: 'General CI'
   schedule:
     - cron: '0 12 * * 1'
 
+permissions: {}
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   general:
     permissions:
       contents: read
       statuses: write
-
+    timeout-minutes: 15
     uses: busybeaver/homelab-shared/.github/workflows/general.yaml@e5bc968880ee2f22fb8b5f4b7191777cebc5fb2c # v1.1.95
     secrets:
       GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
