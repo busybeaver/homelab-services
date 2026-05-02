@@ -54,6 +54,8 @@ services:
     dns: "${DNS_IP}"
     user: "${ADGUARD_USER}:${DOCKER_USER_GROUP}"
     <<: *hardened-security
+    cap_add:
+      - NET_BIND_SERVICE
     tmpfs:
       - "/tmp:rw,noexec,nosuid,nodev,size=64m,mode=660,uid=${ADGUARD_USER},gid=${DOCKER_USER_GROUP}"
       - "/run:rw,noexec,nosuid,nodev,size=1m,mode=660,uid=${ADGUARD_USER},gid=${DOCKER_USER_GROUP}"
@@ -120,6 +122,7 @@ services:
     user: "${UPTIME_KUMA_USER}:${DOCKER_USER_GROUP}"
     <<: *hardened-security
     cap_add:
+      - NET_BIND_SERVICE
       # health checks such as pings
       - NET_RAW
     tmpfs:
@@ -151,6 +154,7 @@ services:
     dns: "${DNS_IP}"
     <<: *hardened-security
     cap_add:
+      - NET_BIND_SERVICE
       # to communicate with all the IOT devices
       - NET_RAW
     volumes:
