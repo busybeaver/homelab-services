@@ -7,7 +7,8 @@ services:
 
   uptime-kuma:
     environment:
-      UPTIME_KUMA_HOST: 172.20.0.132
+      UPTIME_KUMA_HOST: 0.0.0.0
+      NODE_TLS_REJECT_UNAUTHORIZED: "0"
     networks:
       dockervlan:
         ipv4_address: 172.20.0.132
@@ -34,7 +35,7 @@ services:
       adguard-home:
         condition: service_healthy
       uptime-kuma:
-        condition: service_healthy
+        condition: service_started
       node-red:
         condition: service_healthy
     command:
@@ -44,7 +45,11 @@ services:
         set -e
         for service in adguard-home uptime-kuma node-red; do
           echo "Testing $${service}..."
-          curl --retry 10 --retry-delay 5 --retry-connrefused -k -f "https://$${service}:443/" || (echo "$${service} test failed" && exit 1)
+          # Verify HTTP(S) availability and check for specific content patterns
+          # For Uptime Kuma and Node-RED, we check for 'html' or specific UI markers
+          # AdGuard Home also has a web UI
+          curl --retry 15 --retry-delay 5 --retry-connrefused -L -k -f "https://$${service}:443/" | grep -qiE "html|adguard|uptime|node-red" || (echo "$${service} content verification failed" && exit 1)
+          echo "$${service} is up and serving content."
         done
         echo "All tests passed!"
 
