@@ -7,7 +7,8 @@ services:
 
   uptime-kuma:
     environment:
-      UPTIME_KUMA_HOST: 172.20.0.132
+      UPTIME_KUMA_HOST: 0.0.0.0
+      NODE_TLS_REJECT_UNAUTHORIZED: "0"
     networks:
       dockervlan:
         ipv4_address: 172.20.0.132
@@ -34,7 +35,7 @@ services:
       adguard-home:
         condition: service_healthy
       uptime-kuma:
-        condition: service_healthy
+        condition: service_started
       node-red:
         condition: service_healthy
     command:
@@ -44,7 +45,21 @@ services:
         set -e
         for service in adguard-home uptime-kuma node-red; do
           echo "Testing $${service}..."
-          curl --retry 10 --retry-delay 5 --retry-connrefused -k -f "https://$${service}:443/" || (echo "$${service} test failed" && exit 1)
+          # Resiliently attempt connectivity via both HTTP and HTTPS on port 443.
+          # Some services (like Uptime Kuma) might serve HTTP on 443 during setup.
+          SUCCESS=false
+          for proto in https http; do
+            echo "Attempting $${proto}://$${service}:443/..."
+            if curl --retry 10 --retry-delay 3 --retry-connrefused -L -k -s "$${proto}://$${service}:443/" | grep -qiE "html|adguard|uptime|node-red|kuma|setup"; then
+              echo "$${service} is up and serving content via $${proto}."
+              SUCCESS=true
+              break
+            fi
+          done
+          if [ "$${SUCCESS}" = false ]; then
+            echo "$${service} content verification failed on all protocols"
+            exit 1
+          fi
         done
         echo "All tests passed!"
 

@@ -3,7 +3,14 @@ x-hardened-security: &hardened-security
     - ALL
   read_only: true
   security_opt:
-    - no-new-privileges:true
+    - "no-new-privileges:${NO_NEW_PRIVILEGES:-true}"
+
+x-logging: &logging
+  logging:
+    driver: "json-file"
+    options:
+      max-size: "10m"
+      max-file: "3"
 
 services:
   # caddy:
@@ -45,7 +52,7 @@ services:
     mac_address: "${ADGUARD_MAC_ADDRESS}"
     dns: "${DNS_IP}"
     user: "${ADGUARD_USER}:${DOCKER_USER_GROUP}"
-    <<: *hardened-security
+    <<: [*hardened-security, *logging]
     cap_add:
       - NET_BIND_SERVICE
     tmpfs:
@@ -110,7 +117,7 @@ services:
     mac_address: "${UPTIME_KUMA_MAC_ADDRESS}"
     dns: "${DNS_IP}"
     user: "${UPTIME_KUMA_USER}:${DOCKER_USER_GROUP}"
-    <<: *hardened-security
+    <<: [*hardened-security, *logging]
     cap_add:
       - NET_BIND_SERVICE
       # health checks such as pings
@@ -140,7 +147,7 @@ services:
     # expose:
     #   - "${NODE_RED_PORT}"
     dns: "${DNS_IP}"
-    <<: *hardened-security
+    <<: [*hardened-security, *logging]
     cap_add:
       - NET_BIND_SERVICE
       # to communicate with all the IOT devices
