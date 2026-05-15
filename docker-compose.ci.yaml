@@ -49,8 +49,8 @@ services:
           # that may toggle protocols during their startup/setup sequence.
           SUCCESS=false
           for proto in https http; do
-            echo "Attempting $${proto}://$${service}..."
-            if curl --retry 10 --retry-delay 2 --retry-connrefused -L -k -s -f "$${proto}://$${service}/" | grep -qiE "html|adguard|uptime|node-red"; then
+            echo "Attempting $${proto}://$${service}:443/..."
+            if curl --retry 10 --retry-delay 2 --retry-connrefused -L -k -s -f "$${proto}://$${service}:443/" | grep -qiE "html|adguard|uptime|node-red"; then
               echo "$${service} is up and serving content via $${proto}."
               SUCCESS=true
               break
