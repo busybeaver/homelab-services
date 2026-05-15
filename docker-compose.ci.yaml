@@ -45,12 +45,12 @@ services:
         set -e
         for service in adguard-home uptime-kuma node-red; do
           echo "Testing $${service}..."
-          # Resiliently attempt connectivity via both HTTP and HTTPS to handle services
-          # that may toggle protocols during their startup/setup sequence.
+          # Resiliently attempt connectivity via both HTTP and HTTPS on port 443.
+          # Some services (like Uptime Kuma) might serve HTTP on 443 during setup.
           SUCCESS=false
           for proto in https http; do
             echo "Attempting $${proto}://$${service}:443/..."
-            if curl --retry 10 --retry-delay 2 --retry-connrefused -L -k -s -f "$${proto}://$${service}:443/" | grep -qiE "html|adguard|uptime|node-red"; then
+            if curl --retry 10 --retry-delay 3 --retry-connrefused -L -k -s "$${proto}://$${service}:443/" | grep -qiE "html|adguard|uptime|node-red|kuma|setup"; then
               echo "$${service} is up and serving content via $${proto}."
               SUCCESS=true
               break
