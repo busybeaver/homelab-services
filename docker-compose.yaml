@@ -4,9 +4,9 @@ x-hardened-security: &hardened-security
   read_only: true
   security_opt:
     - no-new-privileges:true
-  sysctls:
-    # keep this for the future, even though the NAS doesn't support this one yet (so we need to keep "cap_add: NET_BIND_SERVICE" for now in addition)
-    # - net.ipv4.ip_unprivileged_port_start=443
+  # sysctls:
+  #   keep this for the future, even though the NAS doesn't support this one yet (so we need to keep "cap_add: NET_BIND_SERVICE" for now in addition)
+  #   - net.ipv4.ip_unprivileged_port_start=443
   logging:
     driver: "json-file"
     options:
