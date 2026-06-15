@@ -58,6 +58,7 @@ services:
       - NET_BIND_SERVICE
     tmpfs:
       - "/tmp:rw,noexec,nosuid,nodev,size=64m,mode=660,uid=${ADGUARD_USER},gid=${DOCKER_USER_GROUP}"
+      - "/run:rw,noexec,nosuid,nodev,size=8m,mode=660,uid=${ADGUARD_USER},gid=${DOCKER_USER_GROUP}"
     volumes:
       - ${VOLUME_BASE_DIRECTORY}/adguard/conf:/opt/adguardhome/conf:rw
       - ${VOLUME_BASE_DIRECTORY}/adguard/work:/opt/adguardhome/work:rw
@@ -66,10 +67,10 @@ services:
       TZ: "${TIMEZONE}"
     healthcheck:
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 -qO- --no-check-certificate https://127.0.0.1:443/ || wget --no-verbose --tries=1 -qO- --no-check-certificate http://127.0.0.1:443/ || exit 1"]
-      interval: 30s
-      timeout: 10s
+      interval: 10s
+      timeout: 5s
       retries: 5
-      start_period: 60s
+      start_period: 30s
     restart: always
 
   # homebridge:
@@ -128,6 +129,7 @@ services:
       - no-new-privileges:false
     tmpfs:
       - "/tmp:rw,noexec,nosuid,nodev,size=256m,mode=660,uid=${UPTIME_KUMA_USER},gid=${DOCKER_USER_GROUP}"
+      - "/run:rw,noexec,nosuid,nodev,size=8m,mode=660,uid=${UPTIME_KUMA_USER},gid=${DOCKER_USER_GROUP}"
     volumes:
       - ${VOLUME_BASE_DIRECTORY}/uptime-kuma/data:/app/data:rw
       - ${VOLUME_BASE_DIRECTORY}/uptime-kuma/cert:/app/cert:ro
@@ -162,6 +164,7 @@ services:
       - no-new-privileges:false
     tmpfs:
       - "/tmp:rw,noexec,nosuid,nodev,size=10m,mode=660,uid=${NODE_RED_USER},gid=${DOCKER_USER_GROUP}"
+      - "/run:rw,noexec,nosuid,nodev,size=8m,mode=660,uid=${NODE_RED_USER},gid=${DOCKER_USER_GROUP}"
     volumes:
       - "${VOLUME_BASE_DIRECTORY}/node-red/data:/data:rw"
       - "${VOLUME_BASE_DIRECTORY}/node-red/cert:/cert:ro"
@@ -171,10 +174,10 @@ services:
       PORT: "443"
     healthcheck:
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 -qO- --no-check-certificate https://127.0.0.1:443/ || wget --no-verbose --tries=1 -qO- --no-check-certificate http://127.0.0.1:443/ || exit 1"]
-      interval: 30s
-      timeout: 10s
+      interval: 10s
+      timeout: 5s
       retries: 5
-      start_period: 60s
+      start_period: 30s
     restart: always
 
   # n8n:
