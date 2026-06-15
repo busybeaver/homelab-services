@@ -81,9 +81,9 @@ services:
             exit 1
           fi
         }
-        test_service "adguard-home" "adguard-home" "443" "AdGuard Home"
-        test_service "uptime-kuma" "uptime-kuma" "443" "Uptime Kuma"
-        test_service "node-red" "node-red" "443" "Node-RED"
+        test_service "adguard-home" "adguard-home" "443" "adguard"
+        test_service "uptime-kuma" "uptime-kuma" "443" "kuma"
+        test_service "node-red" "node-red" "443" "node-red"
         echo "All tests passed!"
 
 networks:
