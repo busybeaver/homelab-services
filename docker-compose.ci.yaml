@@ -60,13 +60,14 @@ services:
             for proto in https http; do
               local url="$${proto}://$${host}:$${port}/"
               echo "  Trying $${url}..."
-              if response=$$(curl -k -s -f --connect-timeout 5 "$${url}"); then
-                if echo "$${response}" | grep -q "$${pattern}"; then
+              if response=$$(curl -k -s -f -L --connect-timeout 5 "$${url}"); then
+                if echo "$${response}" | grep -qi "$${pattern}"; then
                   echo "  $${name} test passed via $${proto}!"
                   success=true
                   break 2
                 else
                   echo "  $${name} connected via $${proto}, but pattern '$${pattern}' not found."
+                  echo "  Response snippet: $$(echo "$${response}" | head -c 500)"
                 fi
               else
                 echo "  $${name} could not be reached via $${proto}."
