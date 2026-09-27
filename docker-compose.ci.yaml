@@ -67,13 +67,16 @@ services:
         echo "All tests passed!"
 
   adguard-home-ts:
-    entrypoint: ["tailscaled"]
+    entrypoint: ["tailscaled", "--tun=userspace-networking"]
+    devices: []
 
   uptime-kuma-ts:
-    entrypoint: ["tailscaled"]
+    entrypoint: ["tailscaled", "--tun=userspace-networking"]
+    devices: []
 
   node-red-ts:
-    entrypoint: ["tailscaled"]
+    entrypoint: ["tailscaled", "--tun=userspace-networking"]
+    devices: []
 
 networks:
   dockervlan:
