@@ -2,22 +2,22 @@ services:
   adguard-home:
     networks:
       dockervlan:
-        ipv4_address: 172.20.0.130
+        ipv4_address: 10.200.0.130
     mac_address: ""
 
   uptime-kuma:
     environment:
-      UPTIME_KUMA_HOST: 172.20.0.132
+      UPTIME_KUMA_HOST: 10.200.0.132
       NODE_TLS_REJECT_UNAUTHORIZED: "0"
     networks:
       dockervlan:
-        ipv4_address: 172.20.0.132
+        ipv4_address: 10.200.0.132
     mac_address: ""
 
   node-red:
     networks:
       dockervlan:
-        ipv4_address: 172.20.0.131
+        ipv4_address: 10.200.0.131
     mac_address: ""
 
   test:
@@ -30,7 +30,7 @@ services:
     restart: "no"
     networks:
       dockervlan:
-        ipv4_address: 172.20.0.133
+        ipv4_address: 10.200.0.133
     depends_on:
       adguard-home:
         condition: service_healthy
@@ -82,4 +82,4 @@ networks:
       parent: ""
     ipam:
       config:
-        - subnet: 172.20.0.0/24
+        - subnet: 10.200.0.0/24
