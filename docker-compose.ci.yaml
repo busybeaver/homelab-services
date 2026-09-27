@@ -20,6 +20,15 @@ services:
         ipv4_address: 10.200.0.131
     mac_address: ""
 
+  adguard-home-ts:
+    devices: []
+
+  uptime-kuma-ts:
+    devices: []
+
+  node-red-ts:
+    devices: []
+
   test:
     image: curlimages/curl:latest
     read_only: true
@@ -65,18 +74,6 @@ services:
         test_service "uptime-kuma" "https://uptime-kuma:443/" "Uptime Kuma"
         test_service "node-red" "https://node-red:443/" "Node-RED"
         echo "All tests passed!"
-
-  adguard-home-ts:
-    entrypoint: ["/bin/sh", "-c", "echo Tailscale sidecar mock && trap 'exit 0' TERM INT; sleep infinity & wait"]
-    devices: []
-
-  uptime-kuma-ts:
-    entrypoint: ["/bin/sh", "-c", "echo Tailscale sidecar mock && trap 'exit 0' TERM INT; sleep infinity & wait"]
-    devices: []
-
-  node-red-ts:
-    entrypoint: ["/bin/sh", "-c", "echo Tailscale sidecar mock && trap 'exit 0' TERM INT; sleep infinity & wait"]
-    devices: []
 
 networks:
   dockervlan:
