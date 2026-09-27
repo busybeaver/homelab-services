@@ -7,7 +7,7 @@ services:
 
   uptime-kuma:
     environment:
-      UPTIME_KUMA_HOST: 10.200.0.132
+      UPTIME_KUMA_HOST: "0.0.0.0"
       NODE_TLS_REJECT_UNAUTHORIZED: "0"
     networks:
       dockervlan:
