@@ -21,12 +21,15 @@ services:
     mac_address: ""
 
   adguard-home-ts:
+    entrypoint: ["tailscaled", "--tun=userspace-networking"]
     devices: []
 
   uptime-kuma-ts:
+    entrypoint: ["tailscaled", "--tun=userspace-networking"]
     devices: []
 
   node-red-ts:
+    entrypoint: ["tailscaled", "--tun=userspace-networking"]
     devices: []
 
   test:
@@ -63,11 +66,11 @@ services:
               echo "$${name} test passed!"
             else
               echo "$${name} test failed: response did not match pattern '$${pattern}'"
-              exit 1
+              return 1
             fi
           else
             echo "$${name} test failed: could not reach $${url}"
-            exit 1
+            return 1
           fi
         }
         test_service "adguard-home" "https://adguard-home:443/" "AdGuard Home"
