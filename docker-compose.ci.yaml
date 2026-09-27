@@ -67,15 +67,15 @@ services:
         echo "All tests passed!"
 
   adguard-home-ts:
-    entrypoint: ["tailscaled", "--tun=userspace-networking"]
+    entrypoint: ["/bin/sh", "-c", "echo Tailscale sidecar mock && trap 'exit 0' TERM INT; sleep infinity & wait"]
     devices: []
 
   uptime-kuma-ts:
-    entrypoint: ["tailscaled", "--tun=userspace-networking"]
+    entrypoint: ["/bin/sh", "-c", "echo Tailscale sidecar mock && trap 'exit 0' TERM INT; sleep infinity & wait"]
     devices: []
 
   node-red-ts:
-    entrypoint: ["tailscaled", "--tun=userspace-networking"]
+    entrypoint: ["/bin/sh", "-c", "echo Tailscale sidecar mock && trap 'exit 0' TERM INT; sleep infinity & wait"]
     devices: []
 
 networks:
