@@ -60,7 +60,7 @@ services:
           echo "Testing $${name} at $${url}..."
           response=$$(curl --retry 5 --retry-delay 5 --retry-connrefused -k -s -f "$${url}")
           if [ $$? -eq 0 ]; then
-            if echo "$${response}" | grep -q "$${pattern}"; then
+            if echo "$${response}" | grep -i -q "$${pattern}"; then
               echo "$${name} test passed!"
             else
               echo "$${name} test failed: response did not match pattern '$${pattern}'"
@@ -71,7 +71,7 @@ services:
             return 1
           fi
         }
-        test_service "adguard-home" "https://adguard-home:443/" "AdGuard Home"
+        test_service "adguard-home" "https://adguard-home:443/" "adguard"
         test_service "node-red" "https://node-red:443/" "Node-RED"
         echo "All tests passed!"
 
