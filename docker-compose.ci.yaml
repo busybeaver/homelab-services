@@ -5,14 +5,14 @@ services:
         ipv4_address: 10.200.0.130
     mac_address: ""
 
-  uptime-kuma:
-    environment:
-      UPTIME_KUMA_HOST: "0.0.0.0"
-      NODE_TLS_REJECT_UNAUTHORIZED: "0"
-    networks:
-      dockervlan:
-        ipv4_address: 10.200.0.132
-    mac_address: ""
+  # uptime-kuma:
+  #   environment:
+  #     UPTIME_KUMA_HOST: 10.200.0.132
+  #     NODE_TLS_REJECT_UNAUTHORIZED: "0"
+  #   networks:
+  #     dockervlan:
+  #       ipv4_address: 10.200.0.132
+  #   mac_address: ""
 
   node-red:
     networks:
@@ -24,9 +24,9 @@ services:
     entrypoint: ["tailscaled", "--tun=userspace-networking"]
     devices: []
 
-  uptime-kuma-ts:
-    entrypoint: ["tailscaled", "--tun=userspace-networking"]
-    devices: []
+  # uptime-kuma-ts:
+  #   entrypoint: ["tailscaled", "--tun=userspace-networking"]
+  #   devices: []
 
   node-red-ts:
     entrypoint: ["tailscaled", "--tun=userspace-networking"]
@@ -45,8 +45,6 @@ services:
         ipv4_address: 10.200.0.133
     depends_on:
       adguard-home:
-        condition: service_healthy
-      uptime-kuma:
         condition: service_healthy
       node-red:
         condition: service_healthy
@@ -74,7 +72,6 @@ services:
           fi
         }
         test_service "adguard-home" "https://adguard-home:443/" "AdGuard Home"
-        test_service "uptime-kuma" "https://uptime-kuma:443/" "Uptime Kuma"
         test_service "node-red" "https://node-red:443/" "Node-RED"
         echo "All tests passed!"
 
