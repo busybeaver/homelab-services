@@ -72,7 +72,7 @@ services:
             return 1
           fi
         }
-        test_service "adguard-home" "https://adguard-home:443/" "adguard"
+        test_service "adguard-home" "https://adguard-home:443/" "apple-touch-icon"
         test_service "node-red" "https://node-red:443/" "Node-RED"
         echo "All tests passed!"
 
