@@ -50,6 +50,7 @@ services:
     networks:
       dockervlan:
         ipv4_address: "${DOCKER_VLAN_IP_PREFIX}.130"
+      adguard-home_internal:
     mac_address: "${ADGUARD_MAC_ADDRESS}"
     dns: "${DNS_IP}"
     user: "${ADGUARD_USER}:${DOCKER_USER_GROUP}"
@@ -71,6 +72,40 @@ services:
       retries: 5
       start_period: 60s
     restart: always
+
+  adguard-home-ts:
+    image: tailscale/tailscale:v1.80.3@sha256:af6026ed3e5892c5d4966962618a09685198111507df16803b2aec7066046582
+    hostname: adguard-home-ts
+    environment:
+      TS_AUTHKEY: ${TS_AUTHKEY_ADGUARD_HOME}
+      TS_AUTH_ONCE: "true"
+      TS_HOSTNAME: adguard-home
+      TS_STATE_DIR: /var/lib/tailscale
+      TS_USERSPACE: "false"
+
+    volumes:
+      - adguard-home-ts-state:/var/lib/tailscale
+
+    devices:
+      - /dev/net/tun:/dev/net/tun
+
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+
+    security_opt:
+      - no-new-privileges:true
+
+    restart: unless-stopped
+    cpus: 0.25
+    mem_limit: 128m
+    mem_reservation: 64m
+    pids_limit: 100
+
+    networks:
+      - adguard-home_internal
 
   # homebridge:
   # image: ghcr.io/busybeaver/homelab-packages/homebridge:latest@sha256:4ef9a16ecc0b24be5dd537e6b344491d72e4cd1a353790a347c908dad426fd94
@@ -115,6 +150,7 @@ services:
     networks:
       dockervlan:
         ipv4_address: "${DOCKER_VLAN_IP_PREFIX}.132"
+      uptime-kuma_internal:
     mac_address: "${UPTIME_KUMA_MAC_ADDRESS}"
     dns: "${DNS_IP}"
     user: "${UPTIME_KUMA_USER}:${DOCKER_USER_GROUP}"
@@ -142,12 +178,47 @@ services:
       # - PGID=${DOCKER_USER_GROUP}
     restart: always
 
+  uptime-kuma-ts:
+    image: tailscale/tailscale:v1.80.3@sha256:af6026ed3e5892c5d4966962618a09685198111507df16803b2aec7066046582
+    hostname: uptime-kuma-ts
+    environment:
+      TS_AUTHKEY: ${TS_AUTHKEY_UPTIME_KUMA}
+      TS_AUTH_ONCE: "true"
+      TS_HOSTNAME: uptime-kuma
+      TS_STATE_DIR: /var/lib/tailscale
+      TS_USERSPACE: "false"
+
+    volumes:
+      - uptime-kuma-ts-state:/var/lib/tailscale
+
+    devices:
+      - /dev/net/tun:/dev/net/tun
+
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+
+    security_opt:
+      - no-new-privileges:true
+
+    restart: unless-stopped
+    cpus: 0.25
+    mem_limit: 128m
+    mem_reservation: 64m
+    pids_limit: 100
+
+    networks:
+      - uptime-kuma_internal
+
   node-red:
     image: ghcr.io/busybeaver/homelab-packages/node-red:2026.03.11@sha256:59308e589dbac32b61dce43d0c9a2167c05361c31e6e1e6d21acd4679ea781ef
     container_name: node-red
     networks:
       dockervlan:
         ipv4_address: "${DOCKER_VLAN_IP_PREFIX}.131"
+      node-red_internal:
     mac_address: "${NODE_RED_MAC_ADDRESS}"
     # expose:
     #   - "${NODE_RED_PORT}"
@@ -176,6 +247,40 @@ services:
       retries: 5
       start_period: 60s
     restart: always
+
+  node-red-ts:
+    image: tailscale/tailscale:v1.80.3@sha256:af6026ed3e5892c5d4966962618a09685198111507df16803b2aec7066046582
+    hostname: node-red-ts
+    environment:
+      TS_AUTHKEY: ${TS_AUTHKEY_NODE_RED}
+      TS_AUTH_ONCE: "true"
+      TS_HOSTNAME: node-red
+      TS_STATE_DIR: /var/lib/tailscale
+      TS_USERSPACE: "false"
+
+    volumes:
+      - node-red-ts-state:/var/lib/tailscale
+
+    devices:
+      - /dev/net/tun:/dev/net/tun
+
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+
+    security_opt:
+      - no-new-privileges:true
+
+    restart: unless-stopped
+    cpus: 0.25
+    mem_limit: 128m
+    mem_reservation: 64m
+    pids_limit: 100
+
+    networks:
+      - node-red_internal
 
   # n8n:
   # image: n8nio/n8n:1.0.4@sha256:ec5f5a6cfbcda11d02ed9ea594735e59f8dd061338abf63da940c3710b874d0f
@@ -224,3 +329,14 @@ networks:
         - subnet: "${DOCKER_VLAN_IP_PREFIX}.0/24"
           ip_range: "${DOCKER_VLAN_IP_PREFIX}.128/25"
           gateway: "${DNS_IP}"
+  adguard-home_internal:
+    internal: true
+  uptime-kuma_internal:
+    internal: true
+  node-red_internal:
+    internal: true
+
+volumes:
+  adguard-home-ts-state:
+  uptime-kuma-ts-state:
+  node-red-ts-state:
