@@ -33,6 +33,13 @@ jobs:
           cp ./volumes/uptime-kuma/cert/cert.key ./volumes/adguard/cert/cert.key
           cp ./volumes/uptime-kuma/cert/cert.cer ./volumes/adguard/cert/cert.cer
 
+          # Create Uptime Kuma db-config.json for non-interactive database setup
+          cat <<'KUMA' > ./volumes/uptime-kuma/data/db-config.json
+          {
+            "dbType": "sqlite"
+          }
+          KUMA
+
           # Create Node-RED settings.js with HTTPS and credentialSecret
           cat <<'SET' > ./volumes/node-red/data/settings.js
           module.exports = {
