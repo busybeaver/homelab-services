@@ -33,6 +33,7 @@ x-hardened-security: &hardened-security
 
 services:
   # caddy:
+  # container_name: caddy
   # image: ghcr.io/busybeaver/homelab-packages/caddy:2023-04-08@sha256:eb37103fa2d68c2335089933fbebffdbaf56bbfb949a2abb93c37c47fbb0cf7d
   # network_mode: host
   # labels:
@@ -62,6 +63,7 @@ services:
   # restart: always
 
   adguard-home:
+    container_name: adguard-home
     image: adguard/adguardhome:v0.107.72@sha256:4956b35b590286e5872fb4336d84a7862a2030c6efb4ca16442580c37d7ba32d
     networks:
       dockervlan:
@@ -90,6 +92,7 @@ services:
     restart: always
 
   adguard-home-ts:
+    container_name: adguard-home-ts
     <<: *tailscale-sidecar
     environment:
       TS_AUTHKEY: ${TS_AUTHKEY_ADGUARD_HOME}
@@ -107,6 +110,7 @@ services:
       - ts_egress
 
   # homebridge:
+  # container_name: homebridge
   # image: ghcr.io/busybeaver/homelab-packages/homebridge:latest@sha256:4ef9a16ecc0b24be5dd537e6b344491d72e4cd1a353790a347c908dad426fd94
   # networks:
   # dockervlan:
@@ -143,6 +147,7 @@ services:
   # restart: always
 
   #   uptime-kuma:
+  #     container_name: uptime-kuma
   #     image: ghcr.io/busybeaver/homelab-packages/uptime-kuma:2026.03.11@sha256:66bbce18a4bad06af3c133ae3555f2fb5e3d00c0d547970183fff4cfb575996f
   #     networks:
   #       dockervlan:
@@ -176,6 +181,7 @@ services:
   #     restart: always
 
   #   uptime-kuma-ts:
+  #     container_name: uptime-kuma-ts
   #     <<: *tailscale-sidecar
   #     environment:
   #       TS_AUTHKEY: ${TS_AUTHKEY_UPTIME_KUMA}
@@ -193,6 +199,7 @@ services:
   #       - ts_egress
 
   beszel-hub:
+    container_name: beszel-hub
     image: henrygd/beszel:v0.20.0@sha256:897e807a065adf8e89e30ae0cd79d1f5e38fe84ccaffbc418bde9d3cdca4eacc
     restart: unless-stopped
     networks:
@@ -233,6 +240,7 @@ services:
       retries: 3
 
   beszel-hub-ts:
+    container_name: beszel-hub-ts
     <<: *tailscale-sidecar
     environment:
       TS_AUTHKEY: ${TS_AUTHKEY_BESZEL}
@@ -250,6 +258,7 @@ services:
       - ts_egress
 
   node-red:
+    container_name: node-red
     image: ghcr.io/busybeaver/homelab-packages/node-red:2026.03.11@sha256:59308e589dbac32b61dce43d0c9a2167c05361c31e6e1e6d21acd4679ea781ef
     networks:
       dockervlan:
@@ -285,6 +294,7 @@ services:
     restart: always
 
   node-red-ts:
+    container_name: node-red-ts
     <<: *tailscale-sidecar
     environment:
       TS_AUTHKEY: ${TS_AUTHKEY_NODE_RED}
@@ -302,8 +312,8 @@ services:
       - ts_egress
 
   # n8n:
-  # image: n8nio/n8n:1.0.4@sha256:ec5f5a6cfbcda11d02ed9ea594735e59f8dd061338abf63da940c3710b874d0f
   # container_name: n8n
+  # image: n8nio/n8n:1.0.4@sha256:ec5f5a6cfbcda11d02ed9ea594735e59f8dd061338abf63da940c3710b874d0f
   # networks:
   # internal_network:
   # ipv4_address: "${INTERNAL_NETWORK_IP_PREFIX}.4"
