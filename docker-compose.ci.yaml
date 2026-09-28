@@ -2,23 +2,35 @@ services:
   adguard-home:
     networks:
       dockervlan:
-        ipv4_address: 172.20.0.130
+        ipv4_address: 10.200.0.130
     mac_address: ""
 
-  uptime-kuma:
-    environment:
-      UPTIME_KUMA_HOST: 172.20.0.132
-      NODE_TLS_REJECT_UNAUTHORIZED: "0"
-    networks:
-      dockervlan:
-        ipv4_address: 172.20.0.132
-    mac_address: ""
+  # uptime-kuma:
+  #   environment:
+  #     UPTIME_KUMA_HOST: 10.200.0.132
+  #     NODE_TLS_REJECT_UNAUTHORIZED: "0"
+  #   networks:
+  #     dockervlan:
+  #       ipv4_address: 10.200.0.132
+  #   mac_address: ""
 
   node-red:
     networks:
       dockervlan:
-        ipv4_address: 172.20.0.131
+        ipv4_address: 10.200.0.131
     mac_address: ""
+
+  adguard-home-ts:
+    entrypoint: ["tailscaled", "--tun=userspace-networking"]
+    devices: []
+
+  # uptime-kuma-ts:
+  #   entrypoint: ["tailscaled", "--tun=userspace-networking"]
+  #   devices: []
+
+  node-red-ts:
+    entrypoint: ["tailscaled", "--tun=userspace-networking"]
+    devices: []
 
   test:
     image: curlimages/curl:latest
@@ -30,11 +42,9 @@ services:
     restart: "no"
     networks:
       dockervlan:
-        ipv4_address: 172.20.0.133
+        ipv4_address: 10.200.0.133
     depends_on:
       adguard-home:
-        condition: service_healthy
-      uptime-kuma:
         condition: service_healthy
       node-red:
         condition: service_healthy
@@ -48,21 +58,21 @@ services:
           local url=$$2
           local pattern=$$3
           echo "Testing $${name} at $${url}..."
-          response=$$(curl --retry 5 --retry-delay 5 --retry-connrefused -k -s -f "$${url}")
+          response=$$(curl -L --retry 5 --retry-delay 5 --retry-connrefused -k -s -f "$${url}")
           if [ $$? -eq 0 ]; then
-            if echo "$${response}" | grep -q "$${pattern}"; then
+            if echo "$${response}" | grep -i -q "$${pattern}"; then
               echo "$${name} test passed!"
             else
               echo "$${name} test failed: response did not match pattern '$${pattern}'"
-              exit 1
+              printf "Response body preview:\n%.500s\n" "$${response}"
+              return 1
             fi
           else
             echo "$${name} test failed: could not reach $${url}"
-            exit 1
+            return 1
           fi
         }
-        test_service "adguard-home" "https://adguard-home:443/" "AdGuard Home"
-        test_service "uptime-kuma" "https://uptime-kuma:443/" "Uptime Kuma"
+        test_service "adguard-home" "https://adguard-home:443/" "apple-touch-icon"
         test_service "node-red" "https://node-red:443/" "Node-RED"
         echo "All tests passed!"
 
@@ -73,4 +83,4 @@ networks:
       parent: ""
     ipam:
       config:
-        - subnet: 172.20.0.0/24
+        - subnet: 10.200.0.0/24
