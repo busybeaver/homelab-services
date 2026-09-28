@@ -96,7 +96,7 @@ services:
     environment:
       TS_AUTHKEY: ${TS_AUTHKEY_ADGUARD_HOME}
       TS_AUTH_ONCE: "true"
-      TS_EXTRA_ARGS: --advertise-tags=tag:type-docker,tag:hosting-onpremise
+      TS_EXTRA_ARGS: --advertise-tags=tag:type-docker,tag:hosting-onpremise,tag:svc-adguard
       TS_HOSTNAME: adguard-home
       TS_STATE_DIR: /var/lib/tailscale
       TS_USERSPACE: "false"
@@ -241,7 +241,7 @@ services:
     environment:
       TS_AUTHKEY: ${TS_AUTHKEY_BESZEL}
       TS_AUTH_ONCE: "true"
-      TS_EXTRA_ARGS: --advertise-tags=tag:type-docker,tag:hosting-onpremise
+      TS_EXTRA_ARGS: --advertise-tags=tag:type-docker,tag:hosting-onpremise,tag:svc-beszel
       TS_HOSTNAME: beszel
       TS_STATE_DIR: /var/lib/tailscale
       TS_USERSPACE: "false"
@@ -295,7 +295,7 @@ services:
     environment:
       TS_AUTHKEY: ${TS_AUTHKEY_NODE_RED}
       TS_AUTH_ONCE: "true"
-      TS_EXTRA_ARGS: --advertise-tags=tag:type-docker,tag:hosting-onpremise
+      TS_EXTRA_ARGS: --advertise-tags=tag:type-docker,tag:hosting-onpremise,tag:svc-node-red
       TS_HOSTNAME: node-red
       TS_STATE_DIR: /var/lib/tailscale
       TS_USERSPACE: "false"
