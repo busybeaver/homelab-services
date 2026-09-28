@@ -197,6 +197,62 @@ services:
   #       - uptime-kuma_internal
   #       - ts_egress
 
+  beszel-hub:
+    image: henrygd/beszel:v0.20.0@sha256:897e807a065adf8e89e30ae0cd79d1f5e38fe84ccaffbc418bde9d3cdca4eacc
+    restart: unless-stopped
+    networks:
+      dockervlan:
+        ipv4_address: "${DOCKER_VLAN_IP_PREFIX}.134"
+      beszel-hub_internal:
+    mac_address: "${BESZEL_MAC_ADDRESS}"
+    dns: "${DNS_IP}"
+    user: "${BESZEL_USER}:${DOCKER_USER_GROUP}"
+    <<: *hardened-security
+    tmpfs:
+      - "/tmp:rw,noexec,nosuid,nodev,size=64m,mode=660,uid=${BESZEL_USER},gid=${DOCKER_USER_GROUP}"
+    volumes:
+      - "${VOLUME_BASE_DIRECTORY}/beszel/data:/beszel_data:rw"
+      - "${VOLUME_BASE_DIRECTORY}/beszel/socket:/beszel_socket:rw"
+    environment:
+      APP_URL: "http://${DOCKER_VLAN_IP_PREFIX}.134:8090"
+      CHECK_UPDATES: "false"
+
+      # Do NOT set AUTO_LOGIN.
+      # Do NOT set TRUSTED_AUTH_HEADER unless you deliberately deploy
+      # a trusted SSO/auth proxy and also configure TRUSTED_PROXY_IPS.
+      # Do NOT set SHARE_ALL_SYSTEMS in a multi-user setup.
+
+      # Optional external dead-man's-switch check:
+      # HEARTBEAT_URL: "https://hc-ping.example.net/<unique-secret-url>"
+      # HEARTBEAT_METHOD: "POST"
+      # HEARTBEAT_INTERVAL: "60"
+    pids_limit: 150
+    mem_limit: 384m
+    cpus: 1.0
+    healthcheck:
+      test: ["CMD", "/beszel", "health", "--url", "http://127.0.0.1:8090"]
+      interval: 60s
+      timeout: 5s
+      start_period: 15s
+      retries: 3
+
+  beszel-hub-ts:
+    <<: *tailscale-sidecar
+    environment:
+      TS_AUTHKEY: ${TS_AUTHKEY_BESZEL}
+      TS_AUTH_ONCE: "true"
+      TS_EXTRA_ARGS: --advertise-tags=tag:type-docker,tag:hosting-onpremise
+      TS_HOSTNAME: beszel
+      TS_STATE_DIR: /var/lib/tailscale
+      TS_USERSPACE: "false"
+
+    volumes:
+      - beszel-hub-ts-state:/var/lib/tailscale
+
+    networks:
+      - beszel-hub_internal
+      - ts_egress
+
   node-red:
     image: ghcr.io/busybeaver/homelab-packages/node-red:2026.03.11@sha256:59308e589dbac32b61dce43d0c9a2167c05361c31e6e1e6d21acd4679ea781ef
     container_name: node-red
@@ -304,6 +360,9 @@ networks:
   # uptime-kuma_internal:
   #   driver: bridge
   #   internal: true
+  beszel-hub_internal:
+    driver: bridge
+    internal: true
   node-red_internal:
     driver: bridge
     internal: true
@@ -313,4 +372,5 @@ networks:
 volumes:
   adguard-home-ts-state:
   # uptime-kuma-ts-state:
+  beszel-hub-ts-state:
   node-red-ts-state:
