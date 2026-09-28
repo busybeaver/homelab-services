@@ -1,3 +1,20 @@
+x-tailscale-sidecar: &tailscale-sidecar
+  image: tailscale/tailscale:v1.80.3@sha256:af6026ed3e5892c5d4966962618a09685198111507df16803b2aec7066046582
+  devices:
+    - /dev/net/tun:/dev/net/tun
+  cap_drop:
+    - ALL
+  cap_add:
+    - NET_ADMIN
+    - NET_RAW
+  security_opt:
+    - no-new-privileges:true
+  restart: unless-stopped
+  cpus: 0.25
+  mem_limit: 128m
+  mem_reservation: 64m
+  pids_limit: 100
+
 x-hardened-security: &hardened-security
   cap_drop:
     - ALL
@@ -74,7 +91,7 @@ services:
     restart: always
 
   adguard-home-ts:
-    image: tailscale/tailscale:v1.80.3@sha256:af6026ed3e5892c5d4966962618a09685198111507df16803b2aec7066046582
+    <<: *tailscale-sidecar
     hostname: adguard-home-ts
     environment:
       TS_AUTHKEY: ${TS_AUTHKEY_ADGUARD_HOME}
@@ -86,24 +103,6 @@ services:
 
     volumes:
       - adguard-home-ts-state:/var/lib/tailscale
-
-    devices:
-      - /dev/net/tun:/dev/net/tun
-
-    cap_drop:
-      - ALL
-    cap_add:
-      - NET_ADMIN
-      - NET_RAW
-
-    security_opt:
-      - no-new-privileges:true
-
-    restart: unless-stopped
-    cpus: 0.25
-    mem_limit: 128m
-    mem_reservation: 64m
-    pids_limit: 100
 
     networks:
       - adguard-home_internal
@@ -181,7 +180,7 @@ services:
   #     restart: always
 
   #   uptime-kuma-ts:
-  #     image: tailscale/tailscale:v1.80.3@sha256:af6026ed3e5892c5d4966962618a09685198111507df16803b2aec7066046582
+  #     <<: *tailscale-sidecar
   #     hostname: uptime-kuma-ts
   #     environment:
   #       TS_AUTHKEY: ${TS_AUTHKEY_UPTIME_KUMA}
@@ -193,24 +192,6 @@ services:
   #
   #     volumes:
   #       - uptime-kuma-ts-state:/var/lib/tailscale
-  #
-  #     devices:
-  #       - /dev/net/tun:/dev/net/tun
-  #
-  #     cap_drop:
-  #       - ALL
-  #     cap_add:
-  #       - NET_ADMIN
-  #       - NET_RAW
-  #
-  #     security_opt:
-  #       - no-new-privileges:true
-  #
-  #     restart: unless-stopped
-  #     cpus: 0.25
-  #     mem_limit: 128m
-  #     mem_reservation: 64m
-  #     pids_limit: 100
   #
   #     networks:
   #       - uptime-kuma_internal
@@ -253,7 +234,7 @@ services:
     restart: always
 
   node-red-ts:
-    image: tailscale/tailscale:v1.80.3@sha256:af6026ed3e5892c5d4966962618a09685198111507df16803b2aec7066046582
+    <<: *tailscale-sidecar
     hostname: node-red-ts
     environment:
       TS_AUTHKEY: ${TS_AUTHKEY_NODE_RED}
@@ -265,24 +246,6 @@ services:
 
     volumes:
       - node-red-ts-state:/var/lib/tailscale
-
-    devices:
-      - /dev/net/tun:/dev/net/tun
-
-    cap_drop:
-      - ALL
-    cap_add:
-      - NET_ADMIN
-      - NET_RAW
-
-    security_opt:
-      - no-new-privileges:true
-
-    restart: unless-stopped
-    cpus: 0.25
-    mem_limit: 128m
-    mem_reservation: 64m
-    pids_limit: 100
 
     networks:
       - node-red_internal
