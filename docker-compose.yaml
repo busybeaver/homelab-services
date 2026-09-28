@@ -33,7 +33,6 @@ x-hardened-security: &hardened-security
 services:
   # caddy:
   # image: ghcr.io/busybeaver/homelab-packages/caddy:2023-04-08@sha256:eb37103fa2d68c2335089933fbebffdbaf56bbfb949a2abb93c37c47fbb0cf7d
-  # container_name: caddy
   # network_mode: host
   # labels:
   # - networks=bridge
@@ -63,7 +62,6 @@ services:
 
   adguard-home:
     image: adguard/adguardhome:v0.107.72@sha256:4956b35b590286e5872fb4336d84a7862a2030c6efb4ca16442580c37d7ba32d
-    container_name: adguard-home
     networks:
       dockervlan:
         ipv4_address: "${DOCKER_VLAN_IP_PREFIX}.130"
@@ -92,7 +90,6 @@ services:
 
   adguard-home-ts:
     <<: *tailscale-sidecar
-    hostname: adguard-home-ts
     environment:
       TS_AUTHKEY: ${TS_AUTHKEY_ADGUARD_HOME}
       TS_AUTH_ONCE: "true"
@@ -110,7 +107,6 @@ services:
 
   # homebridge:
   # image: ghcr.io/busybeaver/homelab-packages/homebridge:latest@sha256:4ef9a16ecc0b24be5dd537e6b344491d72e4cd1a353790a347c908dad426fd94
-  # container_name: homebridge
   # networks:
   # dockervlan:
   # ipv4_address: "${DOCKER_VLAN_IP_PREFIX}.133"
@@ -147,7 +143,6 @@ services:
 
   #   uptime-kuma:
   #     image: ghcr.io/busybeaver/homelab-packages/uptime-kuma:2026.03.11@sha256:66bbce18a4bad06af3c133ae3555f2fb5e3d00c0d547970183fff4cfb575996f
-  #     container_name: uptime-kuma
   #     networks:
   #       dockervlan:
   #         ipv4_address: "${DOCKER_VLAN_IP_PREFIX}.132"
@@ -181,7 +176,6 @@ services:
 
   #   uptime-kuma-ts:
   #     <<: *tailscale-sidecar
-  #     hostname: uptime-kuma-ts
   #     environment:
   #       TS_AUTHKEY: ${TS_AUTHKEY_UPTIME_KUMA}
   #       TS_AUTH_ONCE: "true"
@@ -255,7 +249,6 @@ services:
 
   node-red:
     image: ghcr.io/busybeaver/homelab-packages/node-red:2026.03.11@sha256:59308e589dbac32b61dce43d0c9a2167c05361c31e6e1e6d21acd4679ea781ef
-    container_name: node-red
     networks:
       dockervlan:
         ipv4_address: "${DOCKER_VLAN_IP_PREFIX}.131"
@@ -291,7 +284,6 @@ services:
 
   node-red-ts:
     <<: *tailscale-sidecar
-    hostname: node-red-ts
     environment:
       TS_AUTHKEY: ${TS_AUTHKEY_NODE_RED}
       TS_AUTH_ONCE: "true"
