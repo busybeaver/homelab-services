@@ -199,7 +199,6 @@ services:
 
   beszel-hub:
     image: henrygd/beszel:v0.20.0@sha256:897e807a065adf8e89e30ae0cd79d1f5e38fe84ccaffbc418bde9d3cdca4eacc
-    container_name: beszel
     restart: unless-stopped
     networks:
       dockervlan:
@@ -239,7 +238,6 @@ services:
 
   beszel-hub-ts:
     <<: *tailscale-sidecar
-    hostname: beszel-hub-ts
     environment:
       TS_AUTHKEY: ${TS_AUTHKEY_BESZEL}
       TS_AUTH_ONCE: "true"
