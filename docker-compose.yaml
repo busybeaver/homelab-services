@@ -99,7 +99,7 @@ services:
       TS_USERSPACE: "false"
 
     volumes:
-      - adguard-home-ts-state:/var/lib/tailscale
+      - ${VOLUME_BASE_DIRECTORY}/tailscale/adguard:/var/lib/tailscale:rw
 
     networks:
       - adguard-home_internal
@@ -241,7 +241,7 @@ services:
       TS_USERSPACE: "false"
 
     volumes:
-      - beszel-hub-ts-state:/var/lib/tailscale
+      - ${VOLUME_BASE_DIRECTORY}/tailscale/beszel:/var/lib/tailscale:rw
 
     networks:
       - beszel-hub_internal
@@ -293,7 +293,7 @@ services:
       TS_USERSPACE: "false"
 
     volumes:
-      - node-red-ts-state:/var/lib/tailscale
+      - ${VOLUME_BASE_DIRECTORY}/tailscale/node-red:/var/lib/tailscale:rw
 
     networks:
       - node-red_internal
@@ -360,9 +360,3 @@ networks:
     internal: true
   ts_egress:
     driver: bridge
-
-volumes:
-  adguard-home-ts-state:
-  # uptime-kuma-ts-state:
-  beszel-hub-ts-state:
-  node-red-ts-state:
