@@ -10,7 +10,8 @@ x-tailscale-sidecar: &tailscale-sidecar
   security_opt:
     - no-new-privileges:true
   restart: unless-stopped
-  cpus: 0.25
+  # not supported by Synology NAS:
+  # cpus: 0.25
   mem_limit: 128m
   mem_reservation: 64m
   pids_limit: 100
@@ -222,7 +223,8 @@ services:
       # HEARTBEAT_INTERVAL: "60"
     pids_limit: 150
     mem_limit: 384m
-    cpus: 1.0
+    # not supported by Synology NAS:
+    # cpus: 1.0
     healthcheck:
       test: ["CMD", "/beszel", "health", "--url", "http://127.0.0.1:8090"]
       interval: 60s
