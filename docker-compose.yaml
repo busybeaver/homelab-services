@@ -1,5 +1,5 @@
 x-tailscale-sidecar: &tailscale-sidecar
-  image: tailscale/tailscale:v1.80.3@sha256:af6026ed3e5892c5d4966962618a09685198111507df16803b2aec7066046582
+  image: tailscale/tailscale:v1.102.5@sha256:c507f3a2a6ab1cabd8d809b98edeb41edbd5c3fb6ad9632ffd098b4c7d0b4065
   devices:
     - /dev/net/tun:/dev/net/tun
   cap_drop:
@@ -34,7 +34,7 @@ x-hardened-security: &hardened-security
 services:
   # caddy:
   # container_name: caddy
-  # image: ghcr.io/busybeaver/homelab-packages/caddy:2023-04-08@sha256:eb37103fa2d68c2335089933fbebffdbaf56bbfb949a2abb93c37c47fbb0cf7d
+  # image: ghcr.io/busybeaver/homelab-packages/caddy:latest@sha256:b33f07731bc1101dba8ff90a3c6823b918a318fa048aa6200276da72b1f4e280
   # network_mode: host
   # labels:
   # - networks=bridge
@@ -64,7 +64,7 @@ services:
 
   adguard-home:
     container_name: adguard-home
-    image: adguard/adguardhome:v0.107.72@sha256:4956b35b590286e5872fb4336d84a7862a2030c6efb4ca16442580c37d7ba32d
+    image: adguard/adguardhome:v0.107.79@sha256:aba9e3bf0613be3ba3755e1fc311b126e2c24bec25e18b6483894a88283074f0
     networks:
       dockervlan:
         ipv4_address: "${DOCKER_VLAN_IP_PREFIX}.130"
@@ -113,7 +113,7 @@ services:
 
   # homebridge:
   # container_name: homebridge
-  # image: ghcr.io/busybeaver/homelab-packages/homebridge:latest@sha256:4ef9a16ecc0b24be5dd537e6b344491d72e4cd1a353790a347c908dad426fd94
+  # image: ghcr.io/busybeaver/homelab-packages/homebridge:latest@sha256:8fc74788a263c4f8dd2778ee41a0cf335689cee1d9b95346b319d7662c32dc72
   # networks:
   # dockervlan:
   # ipv4_address: "${DOCKER_VLAN_IP_PREFIX}.133"
@@ -150,7 +150,7 @@ services:
 
   #   uptime-kuma:
   #     container_name: uptime-kuma
-  #     image: ghcr.io/busybeaver/homelab-packages/uptime-kuma:2026.03.11@sha256:66bbce18a4bad06af3c133ae3555f2fb5e3d00c0d547970183fff4cfb575996f
+  #     image: ghcr.io/busybeaver/homelab-packages/uptime-kuma:latest@sha256:66bbce18a4bad06af3c133ae3555f2fb5e3d00c0d547970183fff4cfb575996f
   #     networks:
   #       dockervlan:
   #         ipv4_address: "${DOCKER_VLAN_IP_PREFIX}.132"
@@ -263,7 +263,7 @@ services:
 
   node-red:
     container_name: node-red
-    image: ghcr.io/busybeaver/homelab-packages/node-red:2026.03.11@sha256:59308e589dbac32b61dce43d0c9a2167c05361c31e6e1e6d21acd4679ea781ef
+    image: ghcr.io/busybeaver/homelab-packages/node-red:latest@sha256:59308e589dbac32b61dce43d0c9a2167c05361c31e6e1e6d21acd4679ea781ef
     networks:
       dockervlan:
         ipv4_address: "${DOCKER_VLAN_IP_PREFIX}.131"
@@ -319,7 +319,7 @@ services:
 
   # n8n:
   # container_name: n8n
-  # image: n8nio/n8n:1.0.4@sha256:ec5f5a6cfbcda11d02ed9ea594735e59f8dd061338abf63da940c3710b874d0f
+  # image: n8nio/n8n:1.123.82@sha256:b1c9c13fb38cbee8da30258ddda2862066ab0c32f34126a9f6897d13dc757990
   # networks:
   # internal_network:
   # ipv4_address: "${INTERNAL_NETWORK_IP_PREFIX}.4"
