@@ -69,6 +69,8 @@ services:
       dockervlan:
         ipv4_address: "${DOCKER_VLAN_IP_PREFIX}.130"
       adguard-home_internal:
+        aliases:
+          - "${ADGUARD_DOMAIN}"
     mac_address: "${ADGUARD_MAC_ADDRESS}"
     dns: "${DNS_IP}"
     user: "${ADGUARD_USER}:${DOCKER_USER_GROUP}"
@@ -206,6 +208,8 @@ services:
       dockervlan:
         ipv4_address: "${DOCKER_VLAN_IP_PREFIX}.134"
       beszel-hub_internal:
+        aliases:
+          - "${BESZEL_DOMAIN}"
     mac_address: "${BESZEL_MAC_ADDRESS}"
     dns: "${DNS_IP}"
     user: "${BESZEL_USER}:${DOCKER_USER_GROUP}"
@@ -264,6 +268,8 @@ services:
       dockervlan:
         ipv4_address: "${DOCKER_VLAN_IP_PREFIX}.131"
       node-red_internal:
+        aliases:
+          - "${NODE_RED_DOMAIN}"
     mac_address: "${NODE_RED_MAC_ADDRESS}"
     # expose:
     #   - "${NODE_RED_PORT}"
