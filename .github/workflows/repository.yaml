@@ -6,10 +6,6 @@ name: "Repository CI"
     branches:
       - main
       - gh-readonly-queue/main/**
-  # run on pull requests that target the main branch
-  pull_request:
-    branches:
-      - main
   # run on pull request events
   pull_request_target:
     types:
@@ -22,8 +18,8 @@ name: "Repository CI"
       - main
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' || github.event_name == 'pull_request_target' }}
 
 jobs:
   repository:
