@@ -86,7 +86,11 @@ services:
     environment:
       TZ: "${TIMEZONE}"
     healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 -qO- --no-check-certificate https://127.0.0.1:443/ || wget --no-verbose --tries=1 -qO- --no-check-certificate http://127.0.0.1:443/ || exit 1"]
+      test:
+        [
+          "CMD-SHELL",
+          "wget --no-verbose --tries=1 -qO- --no-check-certificate https://127.0.0.1:443/ || wget --no-verbose --tries=1 -qO- --no-check-certificate http://127.0.0.1:443/ || exit 1",
+        ]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -292,7 +296,11 @@ services:
       TZ: "${TIMEZONE}"
       PORT: "443"
     healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 -qO- --no-check-certificate https://127.0.0.1:443/ || wget --no-verbose --tries=1 -qO- --no-check-certificate http://127.0.0.1:443/ || exit 1"]
+      test:
+        [
+          "CMD-SHELL",
+          "wget --no-verbose --tries=1 -qO- --no-check-certificate https://127.0.0.1:443/ || wget --no-verbose --tries=1 -qO- --no-check-certificate http://127.0.0.1:443/ || exit 1",
+        ]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -315,6 +323,116 @@ services:
 
     networks:
       - node-red_internal
+      - ts_egress
+
+  postgres:
+    container_name: postgres
+    image: pgvector/pgvector:pg18@sha256:2ba9ca5f2e7daa0f0e7723cba1ee9167bab54efd3640516a44ac1a928dd67e7a
+    user: "${POSTGRES_USER_ID}:${DOCKER_USER_GROUP}"
+    <<: *hardened-security
+    tmpfs:
+      - "/tmp:rw,noexec,nosuid,nodev,size=64m,mode=660,uid=${POSTGRES_USER_ID},gid=${DOCKER_USER_GROUP}"
+      - "/run/postgresql:rw,noexec,nosuid,nodev,size=16m,mode=770,uid=${POSTGRES_USER_ID},gid=${DOCKER_USER_GROUP}"
+    volumes:
+      - ${VOLUME_BASE_DIRECTORY}/postgres/data:/var/lib/postgresql/data:rw
+      - ${VOLUME_BASE_DIRECTORY}/postgres/init:/docker-entrypoint-initdb.d:ro
+    environment:
+      POSTGRES_USER: "${POSTGRES_USER}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+      POSTGRES_DB: "${POSTGRES_DB_OPENWEBUI}"
+      PGDATA: /var/lib/postgresql/data/pgdata
+      TZ: "${TIMEZONE}"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - postgres_internal
+    restart: always
+
+  litellm:
+    container_name: litellm
+    image: ghcr.io/berriai/litellm-database:main-v1.26.13@sha256:0476ec99ff69f5b44e4304ca6e1ee799c17a6e3331e236fee64195a8867343e0
+    user: "${LITELLM_USER}:${DOCKER_USER_GROUP}"
+    <<: *hardened-security
+    tmpfs:
+      - "/tmp:rw,noexec,nosuid,nodev,size=64m,mode=660,uid=${LITELLM_USER},gid=${DOCKER_USER_GROUP}"
+    volumes:
+      - ${VOLUME_BASE_DIRECTORY}/litellm/config.yaml:/app/config.yaml:ro
+    command: ["--config", "/app/config.yaml", "--port", "4000"]
+    environment:
+      DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB_LITELLM}"
+      LITELLM_MASTER_KEY: "${LITELLM_MASTER_KEY}"
+      TZ: "${TIMEZONE}"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget --no-verbose --tries=1 -qO- http://127.0.0.1:4000/health/liveliness || exit 1",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - postgres_internal
+      - ai_network
+    restart: always
+
+  open-webui:
+    container_name: open-webui
+    image: ghcr.io/open-webui/open-webui:main@sha256:8b432fe0a65b91116afc7961365c6cca5379cc923171386a96691f3471f3cae9
+    user: "${OPEN_WEBUI_USER}:${DOCKER_USER_GROUP}"
+    <<: *hardened-security
+    tmpfs:
+      - "/tmp:rw,noexec,nosuid,nodev,size=128m,mode=660,uid=${OPEN_WEBUI_USER},gid=${DOCKER_USER_GROUP}"
+    volumes:
+      - ${VOLUME_BASE_DIRECTORY}/open-webui/data:/app/backend/data:rw
+    environment:
+      DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB_OPENWEBUI}"
+      OPENAI_API_BASE_URL: "http://litellm:4000/v1"
+      OPENAI_API_KEY: "${LITELLM_MASTER_KEY}"
+      WEBUI_SECRET_KEY: "${OPEN_WEBUI_SECRET_KEY}"
+      PORT: "8080"
+      TZ: "${TIMEZONE}"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      litellm:
+        condition: service_healthy
+    networks:
+      dockervlan:
+        ipv4_address: "${DOCKER_VLAN_IP_PREFIX}.135"
+      open-webui_internal:
+        aliases:
+          - "${OPEN_WEBUI_DOMAIN}"
+      postgres_internal:
+      ai_network:
+    mac_address: "${OPEN_WEBUI_MAC_ADDRESS}"
+    dns: "${DNS_IP}"
+    restart: always
+
+  open-webui-ts:
+    container_name: open-webui-ts
+    <<: *tailscale-sidecar
+    environment:
+      TS_AUTHKEY: ${TS_AUTHKEY_OPEN_WEBUI}
+      TS_AUTH_ONCE: "true"
+      TS_EXTRA_ARGS: --advertise-tags=tag:type-docker,tag:hosting-onpremise,tag:svc-open-webui
+      TS_HOSTNAME: open-webui
+      TS_STATE_DIR: /var/lib/tailscale
+      TS_USERSPACE: "false"
+
+    volumes:
+      - ${VOLUME_BASE_DIRECTORY}/tailscale/open-webui:/var/lib/tailscale:rw
+
+    networks:
+      - open-webui_internal
       - ts_egress
 
   # n8n:
@@ -376,5 +494,13 @@ networks:
   node-red_internal:
     driver: bridge
     internal: true
+  open-webui_internal:
+    driver: bridge
+    internal: true
+  postgres_internal:
+    driver: bridge
+    internal: true
+  ai_network:
+    driver: bridge
   ts_egress:
     driver: bridge
