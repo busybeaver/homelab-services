@@ -331,7 +331,7 @@ services:
     user: "${POSTGRES_USER_ID}:${DOCKER_USER_GROUP}"
     <<: *hardened-security
     tmpfs:
-      - "/tmp:rw,noexec,nosuid,nodev,size=64m,mode=660,uid=${POSTGRES_USER_ID},gid=${DOCKER_USER_GROUP}"
+      - "/tmp:rw,noexec,nosuid,nodev,size=64m,mode=770,uid=${POSTGRES_USER_ID},gid=${DOCKER_USER_GROUP}"
       - "/run/postgresql:rw,noexec,nosuid,nodev,size=16m,mode=770,uid=${POSTGRES_USER_ID},gid=${DOCKER_USER_GROUP}"
     volumes:
       - ${VOLUME_BASE_DIRECTORY}/postgres/data:/var/lib/postgresql/data:rw
@@ -358,7 +358,7 @@ services:
     user: "${LITELLM_USER}:${DOCKER_USER_GROUP}"
     <<: *hardened-security
     tmpfs:
-      - "/tmp:rw,noexec,nosuid,nodev,size=64m,mode=660,uid=${LITELLM_USER},gid=${DOCKER_USER_GROUP}"
+      - "/tmp:rw,noexec,nosuid,nodev,size=64m,mode=770,uid=${LITELLM_USER},gid=${DOCKER_USER_GROUP}"
     volumes:
       - ${VOLUME_BASE_DIRECTORY}/litellm/config.yaml:/app/config.yaml:ro
     command: ["--config", "/app/config.yaml", "--port", "4000"]
@@ -390,7 +390,7 @@ services:
     user: "${OPEN_WEBUI_USER}:${DOCKER_USER_GROUP}"
     <<: *hardened-security
     tmpfs:
-      - "/tmp:rw,noexec,nosuid,nodev,size=128m,mode=660,uid=${OPEN_WEBUI_USER},gid=${DOCKER_USER_GROUP}"
+      - "/tmp:rw,noexec,nosuid,nodev,size=128m,mode=770,uid=${OPEN_WEBUI_USER},gid=${DOCKER_USER_GROUP}"
     volumes:
       - ${VOLUME_BASE_DIRECTORY}/open-webui/data:/app/backend/data:rw
     environment:
