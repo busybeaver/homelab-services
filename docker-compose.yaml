@@ -343,7 +343,11 @@ services:
       PGDATA: /var/lib/postgresql/data/pgdata
       TZ: "${TIMEZONE}"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB_OPENWEBUI}",
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -359,12 +363,16 @@ services:
     <<: *hardened-security
     tmpfs:
       - "/tmp:rw,noexec,nosuid,nodev,size=64m,mode=770,uid=${LITELLM_USER},gid=${DOCKER_USER_GROUP}"
+      - "/.cache:rw,noexec,nosuid,nodev,size=64m,mode=770,uid=${LITELLM_USER},gid=${DOCKER_USER_GROUP}"
     volumes:
       - ${VOLUME_BASE_DIRECTORY}/litellm/config.yaml:/app/config.yaml:ro
     command: ["--config", "/app/config.yaml", "--port", "4000"]
     environment:
       DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB_LITELLM}"
       LITELLM_MASTER_KEY: "${LITELLM_MASTER_KEY}"
+      HOME: "/tmp"
+      XDG_CACHE_HOME: "/tmp"
+      PRISMA_PY_CACHE_DIR: "/tmp"
       TZ: "${TIMEZONE}"
     healthcheck:
       test:
