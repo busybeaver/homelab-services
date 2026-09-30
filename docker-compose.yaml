@@ -358,21 +358,17 @@ services:
 
   litellm:
     container_name: litellm
-    image: ghcr.io/berriai/litellm-database:main-v1.26.13@sha256:0476ec99ff69f5b44e4304ca6e1ee799c17a6e3331e236fee64195a8867343e0
+    image: ghcr.io/berriai/litellm:main-v1.23.9@sha256:f1e994bd98ccccb65ff0d3e4b99ae563baf7499cb5d0ef319b78f2d3114fb3fc
     user: "${LITELLM_USER}:${DOCKER_USER_GROUP}"
     <<: *hardened-security
     tmpfs:
-      - "/tmp:rw,nosuid,nodev,size=512m,mode=770,uid=${LITELLM_USER},gid=${DOCKER_USER_GROUP}"
-      - "/.cache:rw,nosuid,nodev,size=256m,mode=770,uid=${LITELLM_USER},gid=${DOCKER_USER_GROUP}"
+      - "/tmp:rw,noexec,nosuid,nodev,size=64m,mode=770,uid=${LITELLM_USER},gid=${DOCKER_USER_GROUP}"
     volumes:
       - ${VOLUME_BASE_DIRECTORY}/litellm/config.yaml:/app/config.yaml:ro
     command: ["--config", "/app/config.yaml", "--port", "4000"]
     environment:
       DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB_LITELLM}"
       LITELLM_MASTER_KEY: "${LITELLM_MASTER_KEY}"
-      HOME: "/tmp"
-      XDG_CACHE_HOME: "/tmp"
-      PRISMA_PY_CACHE_DIR: "/tmp"
       TZ: "${TIMEZONE}"
     healthcheck:
       test:
