@@ -363,7 +363,7 @@ services:
     <<: *hardened-security
     tmpfs:
       - "/tmp:rw,noexec,nosuid,nodev,size=64m,mode=770,uid=${LITELLM_USER},gid=${DOCKER_USER_GROUP}"
-      - "/.cache:rw,noexec,nosuid,nodev,size=64m,mode=770,uid=${LITELLM_USER},gid=${DOCKER_USER_GROUP}"
+      - "/.cache:rw,nosuid,nodev,size=256m,mode=770,uid=${LITELLM_USER},gid=${DOCKER_USER_GROUP}"
     volumes:
       - ${VOLUME_BASE_DIRECTORY}/litellm/config.yaml:/app/config.yaml:ro
     command: ["--config", "/app/config.yaml", "--port", "4000"]
