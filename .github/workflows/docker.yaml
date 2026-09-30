@@ -85,8 +85,7 @@ jobs:
 
           # Create Postgres init script for multiple databases
           cat <<'PGINIT' > ./volumes/postgres/init/01-init-databases.sql
-          CREATE DATABASE openwebui;
-          CREATE DATABASE litellm;
+          SELECT 'CREATE DATABASE litellm' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'litellm')\gexec
           PGINIT
 
           # Create LiteLLM dummy config
