@@ -358,7 +358,7 @@ services:
 
   litellm:
     container_name: litellm
-    image: ghcr.io/berriai/litellm-non_root:main-v1.48.9@sha256:b33c98b63c7b67ac085a25351963229899452fc94bf5b95a7a6cafaa7d4a057a
+    image: ghcr.io/berriai/litellm-non_root:v1.103.2@sha256:bee25ffdd3952562401cd1cb844f2b925f006ea8102d719b6d311cc844594d6c
     user: "${LITELLM_USER}:${DOCKER_USER_GROUP}"
     <<: *hardened-security
     tmpfs:
@@ -370,6 +370,7 @@ services:
     environment:
       DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB_LITELLM}"
       LITELLM_MASTER_KEY: "${LITELLM_MASTER_KEY}"
+      PRISMA_GENERATE_SKIP: "true"
       TZ: "${TIMEZONE}"
     healthcheck:
       test:
