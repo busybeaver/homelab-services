@@ -26,6 +26,12 @@ services:
         ipv4_address: 10.200.0.131
     mac_address: ""
 
+  open-webui:
+    networks:
+      dockervlan:
+        ipv4_address: 10.200.0.135
+    mac_address: ""
+
   adguard-home-ts:
     entrypoint: ["tailscaled", "--tun=userspace-networking"]
     devices: []
@@ -39,6 +45,10 @@ services:
     devices: []
 
   node-red-ts:
+    entrypoint: ["tailscaled", "--tun=userspace-networking"]
+    devices: []
+
+  open-webui-ts:
     entrypoint: ["tailscaled", "--tun=userspace-networking"]
     devices: []
 
@@ -59,6 +69,12 @@ services:
       beszel-hub:
         condition: service_healthy
       node-red:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      litellm:
+        condition: service_healthy
+      open-webui:
         condition: service_healthy
     command:
       - /bin/sh
@@ -87,6 +103,7 @@ services:
         test_service "adguard-home" "https://adguard-home:443/" "apple-touch-icon"
         test_service "beszel-hub" "http://beszel-hub:8090/" "beszel"
         test_service "node-red" "https://node-red:443/" "Node-RED"
+        test_service "open-webui" "http://open-webui:8080/" "webui"
         echo "All tests passed!"
 
 networks:
