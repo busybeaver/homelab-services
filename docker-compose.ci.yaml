@@ -63,6 +63,7 @@ services:
     networks:
       dockervlan:
         ipv4_address: 10.200.0.133
+      ai_network:
     depends_on:
       adguard-home:
         condition: service_healthy
@@ -80,14 +81,13 @@ services:
       - /bin/sh
       - -c
       - |
-        set -e
+        set -eu
         test_service() {
           local name=$$1
           local url=$$2
           local pattern=$$3
           echo "Testing $${name} at $${url}..."
-          response=$$(curl -L --retry 5 --retry-delay 5 --retry-connrefused -k -s -f "$${url}")
-          if [ $$? -eq 0 ]; then
+          if response=$$(curl -L --retry 5 --retry-delay 5 --retry-connrefused -k -s -f "$${url}"); then
             if echo "$${response}" | grep -i -q "$${pattern}"; then
               echo "$${name} test passed!"
             else
@@ -103,6 +103,7 @@ services:
         test_service "adguard-home" "https://adguard-home:443/" "apple-touch-icon"
         test_service "beszel-hub" "http://beszel-hub:8090/" "beszel"
         test_service "node-red" "https://node-red:443/" "Node-RED"
+        test_service "litellm" "http://litellm:4000/health/liveliness" "healthy"
         test_service "open-webui" "http://open-webui:8080/" "webui"
         echo "All tests passed!"
 
