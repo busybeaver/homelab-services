@@ -1,0 +1,4 @@
+{
+  "printWidth": 120,
+  "ignorePatterns": [".github/linters/**", "public_key/**"]
+}
