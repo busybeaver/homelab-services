@@ -45,9 +45,10 @@ description = "Validate the compose files with the CI environment"
 run = "docker compose --env-file .env.ci -f docker-compose.homelab.yaml -f docker-compose.ci.yaml config --quiet"
 
 [tasks."check:release"]
-description = "Test the release-policy checker and check every release target (docker-compose.<target>.yaml)"
+description = "Test the release scripts and check every release target (docker-compose.<target>.yaml) against the release policy"
 run = [
   "bash .github/scripts/test-check-compose-release.sh",
+  "bash .github/scripts/test-release-scripts.sh",
   'git ls-files "docker-compose.*.yaml" | grep -vx docker-compose.ci.yaml | while read -r file; do bash .github/scripts/check-compose-release.sh "$file" .env.ci || exit 1; done',
 ]
 

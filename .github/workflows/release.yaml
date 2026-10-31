@@ -1,0 +1,143 @@
+name: "Release CI"
+
+"on":
+  # signed release after a green Docker CI push run on main (see docs/plans/2026-10-16-homelab-services-github-releases-design.md)
+  workflow_run:
+    workflows: ["Docker CI"]
+    types:
+      - completed
+    branches:
+      - main
+  # manual re-release, e.g. after a signing key rotation; still requires a green Docker CI push run
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Release even if no released Compose file changed"
+        type: boolean
+        default: false
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+permissions: {}
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+jobs:
+  release:
+    name: "Signed Compose Release"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # workflow_run: github.ref is always the default branch, so guard on the triggering run itself
+    if: >-
+      (github.event_name == 'workflow_run' &&
+        github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.event == 'push' &&
+        github.event.workflow_run.head_branch == 'main' &&
+        github.event.workflow_run.head_repository.full_name == github.repository) ||
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main')
+    environment: release
+    permissions:
+      contents: write # create releases
+      actions: read # workflow_dispatch: look up the Docker CI run for the commit
+
+    defaults:
+      run:
+        shell: bash
+
+    env:
+      # renovate: datasource=github-releases depName=sigstore/cosign
+      COSIGN_VERSION: v3.1.4
+      HEAD_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+      FORCE: ${{ github.event_name == 'workflow_dispatch' && inputs.force }}
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+
+    steps:
+      - name: StepSecurity - Harden Github-hosted Runners
+        uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
+        with:
+          egress-policy: block
+          disable-telemetry: true
+          disable-sudo-and-containers: true
+          allowed-endpoints: >
+            api.github.com:443
+            github.com:443
+            objects.githubusercontent.com:443
+            release-assets.githubusercontent.com:443
+            rekor.sigstore.dev:443
+            tuf-repo-cdn.sigstore.dev:443
+            uploads.github.com:443
+
+      - name: Git - Checkout
+        id: git_checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ env.HEAD_SHA }}
+          fetch-depth: 0 # history and tags for the change gate
+          persist-credentials: false
+
+      - name: Release - Verify Provenance and Change Gate
+        id: release_gate
+        run: |
+          set -Eeuo pipefail
+          if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
+            runs="$(gh run list --workflow docker.yaml --commit "${HEAD_SHA}" --event push --status success --json databaseId --jq 'length')"
+            [ "${runs}" -gt 0 ] || { echo "::error::no successful Docker CI push run for ${HEAD_SHA}"; exit 1; }
+          fi
+          LAST_TAG="$(gh release list --exclude-drafts --exclude-pre-releases --limit 1 --json tagName --jq '.[0].tagName // ""')"
+          export LAST_TAG
+          bash .github/scripts/release-gate.sh
+
+      - name: Release - Assemble Assets
+        id: release_assemble
+        if: steps.release_gate.outputs.release == 'true'
+        env:
+          LAST_TAG: ${{ steps.release_gate.outputs.last_tag }}
+        run: |
+          set -Eeuo pipefail
+          TAG="v$(date -u +%Y.%m.%d)-${GITHUB_RUN_NUMBER}"
+          export TAG
+          bash .github/scripts/assemble-release.sh dist "${RUNNER_TEMP}/notes.md"
+          echo "tag=${TAG}" >> "${GITHUB_OUTPUT}"
+
+      - name: Cosign - Setup
+        id: cosign_setup
+        if: steps.release_gate.outputs.release == 'true'
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
+        with:
+          cosign-release: ${{ env.COSIGN_VERSION }}
+
+      - name: Cosign - Sign and Self-Verify Checksums
+        id: cosign_sign
+        if: steps.release_gate.outputs.release == 'true'
+        working-directory: ./dist
+        env:
+          COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
+          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+        run: |
+          set -Eeuo pipefail
+          cosign sign-blob --yes --key env://COSIGN_PRIVATE_KEY --bundle SHA256SUMS.sigstore.json SHA256SUMS
+          cosign verify-blob --key ../public_key/cosign.pub --bundle SHA256SUMS.sigstore.json SHA256SUMS
+          sha256sum -c SHA256SUMS
+
+      - name: GitHub - Publish Release
+        id: github_release
+        if: steps.release_gate.outputs.release == 'true'
+        env:
+          TAG: ${{ steps.release_assemble.outputs.tag }}
+        run: |
+          set -Eeuo pipefail
+          if is_draft="$(gh release view "${TAG}" --json isDraft --jq '.isDraft' 2>/dev/null)"; then
+            if [ "${is_draft}" = "false" ]; then
+              echo "::notice::release ${TAG} is already published (workflow re-run)"
+              exit 0
+            fi
+            gh release delete "${TAG}" --yes # leftover draft from a failed attempt
+          fi
+          # draft first: /releases/latest never returns drafts, so hosts never see a partial upload
+          gh release create "${TAG}" --draft --target "${HEAD_SHA}" --title "${TAG}" \
+            --notes-file "${RUNNER_TEMP}/notes.md" dist/*
+          gh release edit "${TAG}" --draft=false --latest
