@@ -1,3 +1,26 @@
-extends:
-  - .lefthook/lefthook-commit-message.yml
-  - .lefthook/lefthook-dprint.yml
+# git hooks; installed by `mise run setup`
+pre-commit:
+  parallel: true
+  jobs:
+    - name: format
+      glob: "*.{yaml,yml,json,json5,md,toml}"
+      run: mise exec -- oxfmt --no-error-on-unmatched-pattern {staged_files}
+      stage_fixed: true
+    - name: secrets
+      run: mise exec -- gitleaks git --pre-commit --staged --config .github/linters/.gitleaks.toml --redact --no-banner
+    - name: compose
+      glob: "{docker-compose.yaml,docker-compose.ci.yaml,.env.ci}"
+      run: mise run check:compose
+    - name: actions
+      glob: ".github/workflows/*.{yaml,yml}"
+      run: mise exec -- actionlint {staged_files}
+    - name: yaml
+      glob: "*.{yaml,yml}"
+      run: mise exec -- yamllint --config-file .github/linters/.yaml-lint.yml {staged_files}
+    - name: editorconfig
+      run: mise exec -- editorconfig-checker -config .github/linters/.ecrc {staged_files}
+
+commit-msg:
+  jobs:
+    - name: conventional-commit
+      run: mise exec -- cog verify --file {1}
