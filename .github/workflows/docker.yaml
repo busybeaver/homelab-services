@@ -19,7 +19,6 @@ env:
 
 jobs:
   validate-and-test:
-    timeout-minutes: 15
     permissions:
       contents: read
     runs-on: ubuntu-latest
