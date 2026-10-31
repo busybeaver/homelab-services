@@ -19,8 +19,11 @@ empty**. Use `.env.ci` as the list of variable names (its values are dummies).
 
 - [ ] Define every variable from `.env.ci` in the NAS `.env`, especially the new ones: `ADGUARD_DOMAIN`,
       `BESZEL_DOMAIN`, `NODE_RED_DOMAIN`, `LITELLM_SALT_KEY`, `OPEN_WEBUI_LITELLM_API_KEY`.
-- [ ] If a variable is meant to be optional/empty, change it in `docker-compose.yaml` to `${VAR:-}` instead.
-- [ ] Validate on the NAS: `docker compose config --quiet` must print nothing.
+- [ ] If a variable is meant to be optional/empty, change it in `docker-compose.homelab.yaml` to `${VAR:-}` instead.
+- [ ] The stack file is now `docker-compose.homelab.yaml`. Until the release-based reconciler deploys it, pass it
+      explicitly (`docker compose -f docker-compose.homelab.yaml …`) or set `COMPOSE_FILE=docker-compose.homelab.yaml`
+      in the NAS `.env`.
+- [ ] Validate on the NAS: `docker compose -f docker-compose.homelab.yaml config --quiet` must print nothing.
 
 ## 3. LiteLLM salt key
 

@@ -9,7 +9,7 @@ pre-commit:
     - name: secrets
       run: mise exec -- gitleaks git --pre-commit --staged --config .github/linters/.gitleaks.toml --redact --no-banner
     - name: compose
-      glob: "{docker-compose.yaml,docker-compose.ci.yaml,.env.ci}"
+      glob: "{docker-compose.*.yaml,.env.ci}"
       run: mise run check:compose
     - name: actions
       glob: ".github/workflows/*.{yaml,yml}"

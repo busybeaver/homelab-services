@@ -38,7 +38,7 @@ run = 'oxfmt --check --no-error-on-unmatched-pattern $(git ls-files)'
 
 [tasks."check:compose"]
 description = "Validate the compose files with the CI environment"
-run = "docker compose --env-file .env.ci -f docker-compose.yaml -f docker-compose.ci.yaml config --quiet"
+run = "docker compose --env-file .env.ci -f docker-compose.homelab.yaml -f docker-compose.ci.yaml config --quiet"
 
 [tasks."check:actions"]
 description = "Lint the GitHub Actions workflows"
@@ -67,8 +67,8 @@ run = "act"
 
 [tasks."compose:up"]
 description = "Start the stack; extra args are passed to `docker compose up`"
-run = "docker compose up"
+run = "docker compose -f docker-compose.homelab.yaml up"
 
 [tasks."compose:down"]
 description = "Stop the stack; extra args are passed to `docker compose down`"
-run = "docker compose down"
+run = "docker compose -f docker-compose.homelab.yaml down"

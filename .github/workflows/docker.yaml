@@ -112,7 +112,7 @@ jobs:
         run: |
           docker compose \
             --env-file .env.ci \
-            -f docker-compose.yaml \
+            -f docker-compose.homelab.yaml \
             -f docker-compose.ci.yaml \
             config
 
@@ -120,7 +120,7 @@ jobs:
         run: |
           docker compose \
             --env-file .env.ci \
-            -f docker-compose.yaml \
+            -f docker-compose.homelab.yaml \
             -f docker-compose.ci.yaml \
             up --abort-on-container-exit --exit-code-from test
 
@@ -129,12 +129,12 @@ jobs:
         run: |
           docker compose \
             --env-file .env.ci \
-            -f docker-compose.yaml \
+            -f docker-compose.homelab.yaml \
             -f docker-compose.ci.yaml \
             ps --all
           docker compose \
             --env-file .env.ci \
-            -f docker-compose.yaml \
+            -f docker-compose.homelab.yaml \
             -f docker-compose.ci.yaml \
             logs --no-color --tail 100
 
@@ -143,6 +143,6 @@ jobs:
         run: |
           docker compose \
             --env-file .env.ci \
-            -f docker-compose.yaml \
+            -f docker-compose.homelab.yaml \
             -f docker-compose.ci.yaml \
             down --volumes --remove-orphans
