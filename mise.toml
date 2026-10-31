@@ -7,11 +7,15 @@
 "aqua:nektos/act" = "0.2.92"
 # linters; they use the same configs as the CI (.github/linters/)
 "aqua:rhysd/actionlint" = "1.7.12"
-"aqua:koalaman/shellcheck" = "0.11.0" # used by actionlint for `run:` scripts
+"aqua:koalaman/shellcheck" = "0.11.0" # also used by actionlint for `run:` scripts
+"aqua:mvdan/sh" = "3.14.1" # shfmt
 "aqua:gitleaks/gitleaks" = "8.30.1"
 "aqua:editorconfig-checker/editorconfig-checker" = "4.0.2"
 "pipx:yamllint" = "1.38.0"
 "aqua:astral-sh/uv" = "0.13.6" # installs pipx tools
+# used by the release-policy checker (.github/scripts/); preinstalled on the GitHub runners
+"aqua:jqlang/jq" = "1.8.2"
+"aqua:mikefarah/yq" = "4.54.1"
 
 [settings]
 # install pipx tools with uv, so no python/pipx setup is required
@@ -39,6 +43,17 @@ run = 'oxfmt --check --no-error-on-unmatched-pattern $(git ls-files)'
 [tasks."check:compose"]
 description = "Validate the compose files with the CI environment"
 run = "docker compose --env-file .env.ci -f docker-compose.homelab.yaml -f docker-compose.ci.yaml config --quiet"
+
+[tasks."check:release"]
+description = "Test the release-policy checker and check every release target (docker-compose.<target>.yaml)"
+run = [
+  "bash .github/scripts/test-check-compose-release.sh",
+  'git ls-files "docker-compose.*.yaml" | grep -vx docker-compose.ci.yaml | while read -r file; do bash .github/scripts/check-compose-release.sh "$file" .env.ci || exit 1; done',
+]
+
+[tasks."check:shell"]
+description = "Lint and check the formatting of all tracked shell scripts"
+run = ['shellcheck $(git ls-files "*.sh")', 'shfmt --diff $(git ls-files "*.sh")']
 
 [tasks."check:actions"]
 description = "Lint the GitHub Actions workflows"

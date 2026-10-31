@@ -11,6 +11,12 @@ pre-commit:
     - name: compose
       glob: "{docker-compose.*.yaml,.env.ci}"
       run: mise run check:compose
+    - name: release-policy
+      glob: "{docker-compose.*.yaml,.env.ci,.github/scripts/**}"
+      run: mise run check:release
+    - name: shell
+      glob: "*.sh"
+      run: mise exec -- shellcheck {staged_files} && mise exec -- shfmt --diff {staged_files}
     - name: actions
       glob: ".github/workflows/*.{yaml,yml}"
       run: mise exec -- actionlint {staged_files}

@@ -116,6 +116,17 @@ jobs:
             -f docker-compose.ci.yaml \
             config
 
+      - name: Validate release targets
+        run: |
+          set -Eeuo pipefail
+          bash .github/scripts/test-check-compose-release.sh
+          mapfile -t targets < <(git ls-files 'docker-compose.*.yaml' | grep -vx 'docker-compose.ci.yaml' | LC_ALL=C sort)
+          [ "${#targets[@]}" -gt 0 ] || { echo "::error::no release targets found"; exit 1; }
+          for file in "${targets[@]}"; do
+            docker compose --env-file .env.ci -f "${file}" config -q
+            bash .github/scripts/check-compose-release.sh "${file}" .env.ci
+          done
+
       - name: Run dynamic integration tests
         run: |
           docker compose \
