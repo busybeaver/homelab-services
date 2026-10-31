@@ -1,6 +1,6 @@
 name: "Repository CI"
 
-'on':
+"on":
   # run on pushes to main
   push:
     branches:
@@ -24,7 +24,7 @@ concurrency:
 permissions: {}
 
 env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 
 jobs:
   repository:

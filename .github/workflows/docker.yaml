@@ -1,6 +1,6 @@
 name: "Docker CI"
 
-'on':
+"on":
   push:
     branches:
       - main
@@ -15,7 +15,7 @@ concurrency:
 permissions: {}
 
 env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 
 jobs:
   validate-and-test:

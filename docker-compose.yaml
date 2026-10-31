@@ -22,8 +22,7 @@ x-tailscale-sidecar: &tailscale-sidecar
       max-file: "3"
   # the tailscale image doesn't define a HEALTHCHECK. containerboot serves /healthz (see TS_ENABLE_HEALTH_CHECK in each sidecar) which returns 200 only once the node has a tailnet IP
   healthcheck:
-    test:
-      ["CMD-SHELL", "wget -q -T 5 -O /dev/null http://127.0.0.1:9002/healthz"]
+    test: ["CMD-SHELL", "wget -q -T 5 -O /dev/null http://127.0.0.1:9002/healthz"]
     interval: 30s
     timeout: 10s
     retries: 3
