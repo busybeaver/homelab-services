@@ -15,11 +15,25 @@ x-tailscale-sidecar: &tailscale-sidecar
   mem_limit: 128m
   mem_reservation: 64m
   pids_limit: 100
+  logging:
+    driver: "json-file"
+    options:
+      max-size: "10m"
+      max-file: "3"
+  # the tailscale image doesn't define a HEALTHCHECK. containerboot serves /healthz (see TS_ENABLE_HEALTH_CHECK in each sidecar) which returns 200 only once the node has a tailnet IP
+  healthcheck:
+    test:
+      ["CMD-SHELL", "wget -q -T 5 -O /dev/null http://127.0.0.1:9002/healthz"]
+    interval: 30s
+    timeout: 10s
+    retries: 3
+    start_period: 60s
 
 x-hardened-security: &hardened-security
   cap_drop:
     - ALL
   read_only: true
+  restart: unless-stopped
   security_opt:
     - no-new-privileges:true
   # important: keep this comment for the future, even though the NAS doesn't support this one yet (so we need to keep "cap_add: NET_BIND_SERVICE" for now in addition)
@@ -67,24 +81,24 @@ services:
     image: adguard/adguardhome:v0.107.79@sha256:aba9e3bf0613be3ba3755e1fc311b126e2c24bec25e18b6483894a88283074f0
     networks:
       dockervlan:
-        ipv4_address: "${DOCKER_VLAN_IP_PREFIX}.130"
+        ipv4_address: "${DOCKER_VLAN_IP_PREFIX:?DOCKER_VLAN_IP_PREFIX is required}.130"
       adguard-home_internal:
         aliases:
-          - "${ADGUARD_DOMAIN}"
-    mac_address: "${ADGUARD_MAC_ADDRESS}"
-    dns: "${DNS_IP}"
-    user: "${ADGUARD_USER}:${DOCKER_USER_GROUP}"
+          - "${ADGUARD_DOMAIN:?ADGUARD_DOMAIN is required}"
+    mac_address: "${ADGUARD_MAC_ADDRESS:?ADGUARD_MAC_ADDRESS is required}"
+    dns: "${DNS_IP:?DNS_IP is required}"
+    user: "${ADGUARD_USER:?ADGUARD_USER is required}:${DOCKER_USER_GROUP:?DOCKER_USER_GROUP is required}"
     <<: *hardened-security
     cap_add:
       - NET_BIND_SERVICE
     tmpfs:
-      - "/tmp:rw,noexec,nosuid,nodev,size=64m,mode=660,uid=${ADGUARD_USER},gid=${DOCKER_USER_GROUP}"
+      - "/tmp:rw,noexec,nosuid,nodev,size=64m,mode=660,uid=${ADGUARD_USER:?ADGUARD_USER is required},gid=${DOCKER_USER_GROUP:?DOCKER_USER_GROUP is required}"
     volumes:
-      - ${VOLUME_BASE_DIRECTORY}/adguard/conf:/opt/adguardhome/conf:rw
-      - ${VOLUME_BASE_DIRECTORY}/adguard/work:/opt/adguardhome/work:rw
-      - ${VOLUME_BASE_DIRECTORY}/adguard/cert:/opt/adguardhome/cert:ro
+      - ${VOLUME_BASE_DIRECTORY:?VOLUME_BASE_DIRECTORY is required}/adguard/conf:/opt/adguardhome/conf:rw
+      - ${VOLUME_BASE_DIRECTORY:?VOLUME_BASE_DIRECTORY is required}/adguard/work:/opt/adguardhome/work:rw
+      - ${VOLUME_BASE_DIRECTORY:?VOLUME_BASE_DIRECTORY is required}/adguard/cert:/opt/adguardhome/cert:ro
     environment:
-      TZ: "${TIMEZONE}"
+      TZ: "${TIMEZONE:?TIMEZONE is required}"
     healthcheck:
       test:
         [
@@ -95,21 +109,24 @@ services:
       timeout: 10s
       retries: 5
       start_period: 60s
-    restart: always
+    pids_limit: 200
+    mem_limit: 256m
 
   adguard-home-ts:
     container_name: adguard-home-ts
     <<: *tailscale-sidecar
     environment:
-      TS_AUTHKEY: ${TS_AUTHKEY_ADGUARD_HOME}
+      TS_AUTHKEY: ${TS_AUTHKEY_ADGUARD_HOME:?TS_AUTHKEY_ADGUARD_HOME is required}
       TS_AUTH_ONCE: "true"
+      TS_ENABLE_HEALTH_CHECK: "true"
       TS_EXTRA_ARGS: --advertise-tags=tag:type-docker,tag:hosting-onpremise,tag:svc-adguard
       TS_HOSTNAME: adguard-home
+      TS_LOCAL_ADDR_PORT: 127.0.0.1:9002
       TS_STATE_DIR: /var/lib/tailscale
       TS_USERSPACE: "false"
 
     volumes:
-      - ${VOLUME_BASE_DIRECTORY}/tailscale/adguard:/var/lib/tailscale:rw
+      - ${VOLUME_BASE_DIRECTORY:?VOLUME_BASE_DIRECTORY is required}/tailscale/adguard:/var/lib/tailscale:rw
 
     networks:
       - adguard-home_internal
@@ -207,24 +224,23 @@ services:
   beszel-hub:
     container_name: beszel-hub
     image: henrygd/beszel:v0.20.0@sha256:897e807a065adf8e89e30ae0cd79d1f5e38fe84ccaffbc418bde9d3cdca4eacc
-    restart: unless-stopped
     networks:
       dockervlan:
-        ipv4_address: "${DOCKER_VLAN_IP_PREFIX}.134"
+        ipv4_address: "${DOCKER_VLAN_IP_PREFIX:?DOCKER_VLAN_IP_PREFIX is required}.134"
       beszel-hub_internal:
         aliases:
-          - "${BESZEL_DOMAIN}"
-    mac_address: "${BESZEL_MAC_ADDRESS}"
-    dns: "${DNS_IP}"
-    user: "${BESZEL_USER}:${DOCKER_USER_GROUP}"
+          - "${BESZEL_DOMAIN:?BESZEL_DOMAIN is required}"
+    mac_address: "${BESZEL_MAC_ADDRESS:?BESZEL_MAC_ADDRESS is required}"
+    dns: "${DNS_IP:?DNS_IP is required}"
+    user: "${BESZEL_USER:?BESZEL_USER is required}:${DOCKER_USER_GROUP:?DOCKER_USER_GROUP is required}"
     <<: *hardened-security
     tmpfs:
-      - "/tmp:rw,noexec,nosuid,nodev,size=64m,mode=660,uid=${BESZEL_USER},gid=${DOCKER_USER_GROUP}"
+      - "/tmp:rw,noexec,nosuid,nodev,size=64m,mode=660,uid=${BESZEL_USER:?BESZEL_USER is required},gid=${DOCKER_USER_GROUP:?DOCKER_USER_GROUP is required}"
     volumes:
-      - "${VOLUME_BASE_DIRECTORY}/beszel/data:/beszel_data:rw"
-      - "${VOLUME_BASE_DIRECTORY}/beszel/socket:/beszel_socket:rw"
+      - "${VOLUME_BASE_DIRECTORY:?VOLUME_BASE_DIRECTORY is required}/beszel/data:/beszel_data:rw"
+      - "${VOLUME_BASE_DIRECTORY:?VOLUME_BASE_DIRECTORY is required}/beszel/socket:/beszel_socket:rw"
     environment:
-      APP_URL: "http://${DOCKER_VLAN_IP_PREFIX}.134:8090"
+      APP_URL: "http://${DOCKER_VLAN_IP_PREFIX:?DOCKER_VLAN_IP_PREFIX is required}.134:8090"
       CHECK_UPDATES: "false"
 
       # Do NOT set AUTO_LOGIN.
@@ -251,15 +267,17 @@ services:
     container_name: beszel-hub-ts
     <<: *tailscale-sidecar
     environment:
-      TS_AUTHKEY: ${TS_AUTHKEY_BESZEL}
+      TS_AUTHKEY: ${TS_AUTHKEY_BESZEL:?TS_AUTHKEY_BESZEL is required}
       TS_AUTH_ONCE: "true"
+      TS_ENABLE_HEALTH_CHECK: "true"
       TS_EXTRA_ARGS: --advertise-tags=tag:type-docker,tag:hosting-onpremise,tag:svc-beszel
       TS_HOSTNAME: beszel
+      TS_LOCAL_ADDR_PORT: 127.0.0.1:9002
       TS_STATE_DIR: /var/lib/tailscale
       TS_USERSPACE: "false"
 
     volumes:
-      - ${VOLUME_BASE_DIRECTORY}/tailscale/beszel:/var/lib/tailscale:rw
+      - ${VOLUME_BASE_DIRECTORY:?VOLUME_BASE_DIRECTORY is required}/tailscale/beszel:/var/lib/tailscale:rw
 
     networks:
       - beszel-hub_internal
@@ -270,14 +288,14 @@ services:
     image: ghcr.io/busybeaver/homelab-packages/node-red:latest@sha256:59308e589dbac32b61dce43d0c9a2167c05361c31e6e1e6d21acd4679ea781ef
     networks:
       dockervlan:
-        ipv4_address: "${DOCKER_VLAN_IP_PREFIX}.131"
+        ipv4_address: "${DOCKER_VLAN_IP_PREFIX:?DOCKER_VLAN_IP_PREFIX is required}.131"
       node-red_internal:
         aliases:
-          - "${NODE_RED_DOMAIN}"
-    mac_address: "${NODE_RED_MAC_ADDRESS}"
+          - "${NODE_RED_DOMAIN:?NODE_RED_DOMAIN is required}"
+    mac_address: "${NODE_RED_MAC_ADDRESS:?NODE_RED_MAC_ADDRESS is required}"
     # expose:
     #   - "${NODE_RED_PORT}"
-    dns: "${DNS_IP}"
+    dns: "${DNS_IP:?DNS_IP is required}"
     <<: *hardened-security
     cap_add:
       - NET_BIND_SERVICE
@@ -287,39 +305,33 @@ services:
       # important: override the "hardened-security" anchor. node-red doesn't work with "no-new-privileges:true", so we cannot set this one for now
       - no-new-privileges:false
     tmpfs:
-      - "/tmp:rw,noexec,nosuid,nodev,size=10m,mode=660,uid=${NODE_RED_USER},gid=${DOCKER_USER_GROUP}"
+      - "/tmp:rw,noexec,nosuid,nodev,size=10m,mode=660,uid=${NODE_RED_USER:?NODE_RED_USER is required},gid=${DOCKER_USER_GROUP:?DOCKER_USER_GROUP is required}"
     volumes:
-      - "${VOLUME_BASE_DIRECTORY}/node-red/data:/data:rw"
-      - "${VOLUME_BASE_DIRECTORY}/node-red/cert:/cert:ro"
-    user: "${NODE_RED_USER}:${DOCKER_USER_GROUP}"
+      - "${VOLUME_BASE_DIRECTORY:?VOLUME_BASE_DIRECTORY is required}/node-red/data:/data:rw"
+      - "${VOLUME_BASE_DIRECTORY:?VOLUME_BASE_DIRECTORY is required}/node-red/cert:/cert:ro"
+    user: "${NODE_RED_USER:?NODE_RED_USER is required}:${DOCKER_USER_GROUP:?DOCKER_USER_GROUP is required}"
     environment:
-      TZ: "${TIMEZONE}"
+      TZ: "${TIMEZONE:?TIMEZONE is required}"
       PORT: "443"
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "wget --no-verbose --tries=1 -qO- --no-check-certificate https://127.0.0.1:443/ || wget --no-verbose --tries=1 -qO- --no-check-certificate http://127.0.0.1:443/ || exit 1",
-        ]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 60s
-    restart: always
+    # no healthcheck here on purpose: the image already defines "HEALTHCHECK node /healthcheck.js" which reads uiPort/https from /data/settings.js (so those must be set there)
+    pids_limit: 300
+    mem_limit: 768m
 
   node-red-ts:
     container_name: node-red-ts
     <<: *tailscale-sidecar
     environment:
-      TS_AUTHKEY: ${TS_AUTHKEY_NODE_RED}
+      TS_AUTHKEY: ${TS_AUTHKEY_NODE_RED:?TS_AUTHKEY_NODE_RED is required}
       TS_AUTH_ONCE: "true"
+      TS_ENABLE_HEALTH_CHECK: "true"
       TS_EXTRA_ARGS: --advertise-tags=tag:type-docker,tag:hosting-onpremise,tag:svc-node-red
       TS_HOSTNAME: node-red
+      TS_LOCAL_ADDR_PORT: 127.0.0.1:9002
       TS_STATE_DIR: /var/lib/tailscale
       TS_USERSPACE: "false"
 
     volumes:
-      - ${VOLUME_BASE_DIRECTORY}/tailscale/node-red:/var/lib/tailscale:rw
+      - ${VOLUME_BASE_DIRECTORY:?VOLUME_BASE_DIRECTORY is required}/tailscale/node-red:/var/lib/tailscale:rw
 
     networks:
       - node-red_internal
@@ -328,84 +340,105 @@ services:
   postgres:
     container_name: postgres
     image: pgvector/pgvector:pg18@sha256:2ba9ca5f2e7daa0f0e7723cba1ee9167bab54efd3640516a44ac1a928dd67e7a
-    user: "${POSTGRES_USER_ID}:${DOCKER_USER_GROUP}"
+    user: "${POSTGRES_USER_ID:?POSTGRES_USER_ID is required}:${DOCKER_USER_GROUP:?DOCKER_USER_GROUP is required}"
     <<: *hardened-security
     tmpfs:
-      - "/tmp:rw,noexec,nosuid,nodev,size=64m,mode=770,uid=${POSTGRES_USER_ID},gid=${DOCKER_USER_GROUP}"
-      - "/run/postgresql:rw,noexec,nosuid,nodev,size=16m,mode=770,uid=${POSTGRES_USER_ID},gid=${DOCKER_USER_GROUP}"
+      - "/tmp:rw,noexec,nosuid,nodev,size=64m,mode=770,uid=${POSTGRES_USER_ID:?POSTGRES_USER_ID is required},gid=${DOCKER_USER_GROUP:?DOCKER_USER_GROUP is required}"
+      - "/run/postgresql:rw,noexec,nosuid,nodev,size=16m,mode=770,uid=${POSTGRES_USER_ID:?POSTGRES_USER_ID is required},gid=${DOCKER_USER_GROUP:?DOCKER_USER_GROUP is required}"
     volumes:
-      - ${VOLUME_BASE_DIRECTORY}/postgres/data:/var/lib/postgresql/data:rw
-      - ${VOLUME_BASE_DIRECTORY}/postgres/init:/docker-entrypoint-initdb.d:ro
+      # the pg18 image declares /var/lib/postgresql as its VOLUME, so mount that path (otherwise docker creates an orphaned anonymous volume). PGDATA below maps to the same host directory (.../postgres/data/pgdata) as before, so existing data stays in place
+      - ${VOLUME_BASE_DIRECTORY:?VOLUME_BASE_DIRECTORY is required}/postgres/data:/var/lib/postgresql:rw
+      - ${VOLUME_BASE_DIRECTORY:?VOLUME_BASE_DIRECTORY is required}/postgres/init:/docker-entrypoint-initdb.d:ro
     environment:
-      POSTGRES_USER: "${POSTGRES_USER}"
-      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
-      POSTGRES_DB: "${POSTGRES_DB_OPENWEBUI}"
-      PGDATA: /var/lib/postgresql/data/pgdata
-      TZ: "${TIMEZONE}"
+      POSTGRES_USER: "${POSTGRES_USER:?POSTGRES_USER is required}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}"
+      POSTGRES_DB: "${POSTGRES_DB_OPENWEBUI:?POSTGRES_DB_OPENWEBUI is required}"
+      PGDATA: /var/lib/postgresql/pgdata
+      TZ: "${TIMEZONE:?TIMEZONE is required}"
     healthcheck:
       test:
         [
           "CMD-SHELL",
-          "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB_OPENWEBUI}",
+          "pg_isready -U ${POSTGRES_USER:?POSTGRES_USER is required} -d ${POSTGRES_DB_OPENWEBUI:?POSTGRES_DB_OPENWEBUI is required}",
         ]
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 10s
+      start_period: 30s
+    # give postgres time to shut down cleanly (checkpoint) before docker sends SIGKILL
+    stop_grace_period: 1m
+    pids_limit: 200
+    mem_limit: 1g
     networks:
       - postgres_internal
-    restart: always
 
   litellm:
     container_name: litellm
     image: ghcr.io/berriai/litellm-non_root:v1.103.2@sha256:bee25ffdd3952562401cd1cb844f2b925f006ea8102d719b6d311cc844594d6c
-    user: "${LITELLM_USER}:${DOCKER_USER_GROUP}"
+    user: "${LITELLM_USER:?LITELLM_USER is required}:${DOCKER_USER_GROUP:?DOCKER_USER_GROUP is required}"
     <<: *hardened-security
     tmpfs:
-      - "/tmp:rw,noexec,nosuid,nodev,size=64m,mode=770,uid=${LITELLM_USER},gid=${DOCKER_USER_GROUP}"
-      - "/.cache:rw,nosuid,nodev,size=1g,mode=770,uid=${LITELLM_USER},gid=${DOCKER_USER_GROUP}"
+      - "/tmp:rw,noexec,nosuid,nodev,size=64m,mode=770,uid=${LITELLM_USER:?LITELLM_USER is required},gid=${DOCKER_USER_GROUP:?DOCKER_USER_GROUP is required}"
+      - "/app/.cache:rw,nosuid,nodev,size=64m,mode=770,uid=${LITELLM_USER:?LITELLM_USER is required},gid=${DOCKER_USER_GROUP:?DOCKER_USER_GROUP is required}"
     volumes:
-      - ${VOLUME_BASE_DIRECTORY}/litellm/config.yaml:/app/config.yaml:ro
+      - ${VOLUME_BASE_DIRECTORY:?VOLUME_BASE_DIRECTORY is required}/litellm/config.yaml:/app/config.yaml:ro
     command: ["--config", "/app/config.yaml", "--port", "4000"]
     environment:
-      DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB_LITELLM}"
-      LITELLM_MASTER_KEY: "${LITELLM_MASTER_KEY}"
+      DATABASE_URL: "postgresql://${POSTGRES_USER:?POSTGRES_USER is required}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@postgres:5432/${POSTGRES_DB_LITELLM:?POSTGRES_DB_LITELLM is required}"
+      LITELLM_MASTER_KEY: "${LITELLM_MASTER_KEY:?LITELLM_MASTER_KEY is required}"
+      # encrypts provider credentials stored in the db. set once and NEVER change it afterwards (stored credentials become unreadable)
+      LITELLM_SALT_KEY: "${LITELLM_SALT_KEY:?set LITELLM_SALT_KEY (once, never change it)}"
       PRISMA_GENERATE_SKIP: "true"
-      TZ: "${TIMEZONE}"
+      TZ: "${TIMEZONE:?TIMEZONE is required}"
+    # the image doesn't define a HEALTHCHECK. "liveliness" (sic) is litellm's actual endpoint name; urlopen raises on non-2xx, so the exit code reflects the result
     healthcheck:
       test:
         [
-          "CMD-SHELL",
-          'python3 -c "import urllib.request; urllib.request.urlopen(''http://127.0.0.1:4000/health/liveliness'')" || exit 1',
+          "CMD",
+          "python3",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:4000/health/liveliness', timeout=5)",
         ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 15s
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      # first start runs the prisma database migrations, which can take a while
+      start_period: 90s
+    pids_limit: 300
+    # tmpfs mounts (see above) count towards this limit
+    mem_limit: 2g
     depends_on:
       postgres:
         condition: service_healthy
     networks:
       - postgres_internal
       - ai_network
-    restart: always
 
   open-webui:
     container_name: open-webui
-    image: ghcr.io/open-webui/open-webui:main@sha256:8b432fe0a65b91116afc7961365c6cca5379cc923171386a96691f3471f3cae9
-    user: "${OPEN_WEBUI_USER}:${DOCKER_USER_GROUP}"
+    image: ghcr.io/open-webui/open-webui:v0.11.4@sha256:9591b13f13843c7721c2b8eaf7382846c81b3ffe126526d1888d1fed50c6a33f
+    user: "${OPEN_WEBUI_USER:?OPEN_WEBUI_USER is required}:${DOCKER_USER_GROUP:?DOCKER_USER_GROUP is required}"
     <<: *hardened-security
     tmpfs:
-      - "/tmp:rw,noexec,nosuid,nodev,size=128m,mode=770,uid=${OPEN_WEBUI_USER},gid=${DOCKER_USER_GROUP}"
+      - "/tmp:rw,noexec,nosuid,nodev,size=128m,mode=770,uid=${OPEN_WEBUI_USER:?OPEN_WEBUI_USER is required},gid=${DOCKER_USER_GROUP:?DOCKER_USER_GROUP is required}"
     volumes:
-      - ${VOLUME_BASE_DIRECTORY}/open-webui/data:/app/backend/data:rw
+      - ${VOLUME_BASE_DIRECTORY:?VOLUME_BASE_DIRECTORY is required}/open-webui/data:/app/backend/data:rw
     environment:
-      DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB_OPENWEBUI}"
+      DATABASE_URL: "postgresql://${POSTGRES_USER:?POSTGRES_USER is required}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@postgres:5432/${POSTGRES_DB_OPENWEBUI:?POSTGRES_DB_OPENWEBUI is required}"
       OPENAI_API_BASE_URL: "http://litellm:4000/v1"
-      OPENAI_API_KEY: "${LITELLM_MASTER_KEY}"
-      WEBUI_SECRET_KEY: "${OPEN_WEBUI_SECRET_KEY}"
+      # a scoped litellm virtual key (created in the litellm admin UI/API), not the master key
+      OPENAI_API_KEY: "${OPEN_WEBUI_LITELLM_API_KEY:?set OPEN_WEBUI_LITELLM_API_KEY to a litellm virtual key}"
+      # use the pgvector extension of the postgres container for RAG embeddings (PGVECTOR_DB_URL defaults to DATABASE_URL) instead of the default chroma in the data volume
+      VECTOR_DB: "pgvector"
+      # no ollama in this stack; without this open-webui keeps probing localhost:11434. (persisted in the db after first start, so later changes are made in the admin UI)
+      ENABLE_OLLAMA_API: "false"
+      WEBUI_SECRET_KEY: "${OPEN_WEBUI_SECRET_KEY:?OPEN_WEBUI_SECRET_KEY is required}"
       PORT: "8080"
-      TZ: "${TIMEZONE}"
+      TZ: "${TIMEZONE:?TIMEZONE is required}"
+    # no healthcheck here on purpose: the image already defines one (curl /health)
+    pids_limit: 300
+    # the default local embedding model for RAG needs quite some memory
+    mem_limit: 4g
     depends_on:
       postgres:
         condition: service_healthy
@@ -413,29 +446,30 @@ services:
         condition: service_healthy
     networks:
       dockervlan:
-        ipv4_address: "${DOCKER_VLAN_IP_PREFIX}.135"
+        ipv4_address: "${DOCKER_VLAN_IP_PREFIX:?DOCKER_VLAN_IP_PREFIX is required}.135"
       open-webui_internal:
         aliases:
-          - "${OPEN_WEBUI_DOMAIN}"
+          - "${OPEN_WEBUI_DOMAIN:?OPEN_WEBUI_DOMAIN is required}"
       postgres_internal:
       ai_network:
-    mac_address: "${OPEN_WEBUI_MAC_ADDRESS}"
-    dns: "${DNS_IP}"
-    restart: always
+    mac_address: "${OPEN_WEBUI_MAC_ADDRESS:?OPEN_WEBUI_MAC_ADDRESS is required}"
+    dns: "${DNS_IP:?DNS_IP is required}"
 
   open-webui-ts:
     container_name: open-webui-ts
     <<: *tailscale-sidecar
     environment:
-      TS_AUTHKEY: ${TS_AUTHKEY_OPEN_WEBUI}
+      TS_AUTHKEY: ${TS_AUTHKEY_OPEN_WEBUI:?TS_AUTHKEY_OPEN_WEBUI is required}
       TS_AUTH_ONCE: "true"
+      TS_ENABLE_HEALTH_CHECK: "true"
       TS_EXTRA_ARGS: --advertise-tags=tag:type-docker,tag:hosting-onpremise,tag:svc-open-webui
       TS_HOSTNAME: open-webui
+      TS_LOCAL_ADDR_PORT: 127.0.0.1:9002
       TS_STATE_DIR: /var/lib/tailscale
       TS_USERSPACE: "false"
 
     volumes:
-      - ${VOLUME_BASE_DIRECTORY}/tailscale/open-webui:/var/lib/tailscale:rw
+      - ${VOLUME_BASE_DIRECTORY:?VOLUME_BASE_DIRECTORY is required}/tailscale/open-webui:/var/lib/tailscale:rw
 
     networks:
       - open-webui_internal
@@ -485,9 +519,9 @@ networks:
       parent: ovs_bond0
     ipam:
       config:
-        - subnet: "${DOCKER_VLAN_IP_PREFIX}.0/24"
-          ip_range: "${DOCKER_VLAN_IP_PREFIX}.128/25"
-          gateway: "${DNS_IP}"
+        - subnet: "${DOCKER_VLAN_IP_PREFIX:?DOCKER_VLAN_IP_PREFIX is required}.0/24"
+          ip_range: "${DOCKER_VLAN_IP_PREFIX:?DOCKER_VLAN_IP_PREFIX is required}.128/25"
+          gateway: "${DNS_IP:?DNS_IP is required}"
   adguard-home_internal:
     driver: bridge
     internal: true
