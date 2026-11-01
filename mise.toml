@@ -69,6 +69,10 @@ run = 'yamllint --config-file .github/linters/.yaml-lint.yml $(git ls-files "*.y
 description = "Scan the git history for leaked secrets"
 run = "gitleaks git --config .github/linters/.gitleaks.toml --redact --no-banner"
 
+[tasks."check:git-crypt"]
+description = "Test the git-crypt check and check that every file git-crypt encrypts (see .gitattributes) is staged encrypted"
+run = ["bash .github/scripts/test-check-git-crypt.sh", "bash .github/scripts/check-git-crypt.sh"]
+
 [tasks."check:editorconfig"]
 description = "Check all tracked files against .editorconfig"
 run = "editorconfig-checker -config .github/linters/.ecrc $(git ls-files ':!:.git-crypt/')"

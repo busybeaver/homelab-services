@@ -210,3 +210,9 @@ volumes/
 
 # local secrets (the CI uses the dummy values in .env.ci)
 .env
+
+# local working notes, network details and worktrees; never commit them (public repository)
+HANDOFF.md
+.vlan-config.json
+local-*.yaml
+.worktrees/
