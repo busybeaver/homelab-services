@@ -30,8 +30,8 @@ Hosts deploy only from signed GitHub Releases (design: [docs/plans](docs/plans/2
   ```
 
 - **Add a target:** add `docker-compose.<target>.yaml` (lowercase letters, digits and `-`; `ci` is reserved) and its
-  variables to `.env.ci` (synthetic values only). Cloud targets are bridge-only (no `network_mode: host`, macvlan/ipvlan
-  or `mac_address`). Images must be digest-pinned and the file self-contained (no relative paths, `include` or
+  variables to `.env.ci` (synthetic values only). Cloud targets are bridge-only (no `network_mode: host`, macvlan/ipvlan,
+  `mac_address`, external networks or `${VAR}` in `network_mode`/network drivers). Images must be digest-pinned and the file self-contained (no relative paths, `include` or
   `extends.file`). `mise run check:release` runs the same policy check as the CI.
 - **Force a release** (e.g. after a signing key rotation): `gh workflow run release.yaml -f force=true`. It still
   requires a green `Docker CI` push run for the commit.

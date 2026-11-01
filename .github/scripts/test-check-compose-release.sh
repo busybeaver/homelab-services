@@ -55,5 +55,11 @@ for dir in fixtures/fail/*/; do
   done
 done
 
+# unparsable file: generated here, so the repository linters never see invalid YAML
+invalid="$(mktemp -d)"
+trap 'rm -rf -- "${invalid}"' EXIT
+printf 'services:\n  web: [\n' >"${invalid}/docker-compose.cloud-a.yaml"
+check "${invalid}/docker-compose.cloud-a.yaml" fail "cannot parse"
+
 echo "${tests} tests, ${failures} failures"
 [ "${tests}" -gt 0 ] && [ "${failures}" -eq 0 ]
