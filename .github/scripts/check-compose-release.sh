@@ -22,19 +22,36 @@ fi
 # Raw YAML: constructs that `docker compose config` would resolve away.
 [ "$(yq --yaml-fix-merge-anchor-to-spec=true '.include // [] | length' "${file}")" -eq 0 ] || fail "top-level include: is not allowed"
 [ "$(yq --yaml-fix-merge-anchor-to-spec=true '[.services[] | select(.extends.file)] | length' "${file}")" -eq 0 ] || fail "extends.file is not allowed"
+not_abs='select((startswith("/") or startswith("$")) | not)'
+# env_file is folded into environment when rendering (and must exist), so it is checked on the raw file (string, list or long syntax)
+env_files="$(yq --yaml-fix-merge-anchor-to-spec=true -o=json 'explode(.)' "${file}" |
+  jq -r "[.services[]?.env_file? // empty | if type == \"string\" then [.] else . end | .[] | (.path? // .) | ${not_abs}] | .[]")"
+[ -z "${env_files}" ] || fail "relative env_file: ${env_files//$'\n'/, }"
 [ "${errors}" -eq 0 ] || exit 1 # the model below cannot be rendered without the referenced files
 
-# Uninterpolated, unresolved model: relative paths stay visible, ${VAR} paths are accepted.
-model="$(docker compose --env-file "${env_file}" -f "${file}" config --no-interpolate --no-path-resolution --format json)"
+# Variable references in the file, without comments and $$ escapes: "${NAME", "${NAME:-", "$NAME", ...
+raw="$(yq --yaml-fix-merge-anchor-to-spec=true '... comments=""' "${file}")"
+refs="$(grep -oE '\$\{[A-Za-z_][A-Za-z0-9_]*(:?[-?+])?|\$[A-Za-z_][A-Za-z0-9_]*' <<<"${raw//\$\$/}" || true)"
+names="$(sed -E 's/^\$\{?([A-Za-z0-9_]+).*/\1/' <<<"${refs}" | LC_ALL=C sort -u)"
+# references without a default (-) or alternative (+) value must be provided by the env file
+required="$(grep -vE ':?[-+]$' <<<"${refs}" | sed -E 's/^\$\{?([A-Za-z0-9_]+).*/\1/' | LC_ALL=C sort -u || true)"
+
+# Model rendered with every variable set to an absolute sentinel path, so ${VAR}-based paths count as absolute while
+# relative paths stay visible. Rendering without interpolation is not portable: Compose 2.x rejects short volume syntax
+# like "${VAR:?msg}/x:/y:rw" with --no-interpolate ("too many colons").
+sentinel_env="$(mktemp)"
+trap 'rm -f -- "${sentinel_env}"' EXIT
+while IFS= read -r var; do
+  [ -z "${var}" ] || printf '%s=/__%s__\n' "${var}" "${var}"
+done <<<"${names}" >"${sentinel_env}"
+model="$(docker compose --env-file "${sentinel_env}" -f "${file}" config --no-path-resolution --format json)"
 check() { # <jq filter emitting offending names> <message>
   local hits
   hits="$(jq -r "$1" <<<"${model}")"
   [ -z "${hits}" ] || fail "$2: ${hits//$'\n'/, }"
 }
-not_abs='select((startswith("/") or startswith("$")) | not)'
 check '.services | to_entries[] | select(.value.build) | .key' 'build: is not allowed'
 check "[.services[].volumes[]? | select(.type == \"bind\") | .source | ${not_abs}] | .[]" 'relative bind mount'
-check "[.services[].env_file[]? | (.path? // .) | ${not_abs}] | .[]" 'relative env_file'
 check "[(.secrets // {}), (.configs // {}) | .[] | (.file? // empty) | ${not_abs}] | .[]" 'relative secrets/configs file'
 check '.services | to_entries[] | select((.value.image // "") | test("@sha256:[0-9a-f]{64}$") | not) | .key' 'image not digest-pinned'
 if [ "${target}" != "homelab" ]; then
@@ -47,12 +64,9 @@ missing_hc="$(jq -r '.services | to_entries[] | select(.value.healthcheck == nul
 [ -z "${missing_hc}" ] || echo "::warning file=${file}::no healthcheck: ${missing_hc//$'\n'/, }"
 
 # Every variable without a default must be provided by the env file.
-# The explicit --env-file keeps compose from loading a local .env next to the file.
 while IFS= read -r var; do
-  [ -n "${var}" ] || continue
-  grep -q "^${var}=" "${env_file}" || fail "variable ${var} has no default and is missing from ${env_file}"
-done < <(docker compose --env-file "${env_file}" -f "${file}" config --variables --format json |
-  jq -r 'to_entries[] | select((.value.DefaultValue // "") == "" and (.value.PresenceValue // "") == "") | .key')
+  [ -z "${var}" ] || grep -q "^${var}=" "${env_file}" || fail "variable ${var} has no default and is missing from ${env_file}"
+done <<<"${required}"
 
 [ "${errors}" -eq 0 ] || exit 1
 echo "release policy OK: ${file}"

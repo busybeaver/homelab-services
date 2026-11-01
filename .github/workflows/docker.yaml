@@ -120,6 +120,7 @@ jobs:
         run: |
           set -Eeuo pipefail
           bash .github/scripts/test-check-compose-release.sh
+          bash .github/scripts/test-release-scripts.sh
           mapfile -t targets < <(git ls-files 'docker-compose.*.yaml' | grep -vx 'docker-compose.ci.yaml' | LC_ALL=C sort)
           [ "${#targets[@]}" -gt 0 ] || { echo "::error::no release targets found"; exit 1; }
           for file in "${targets[@]}"; do

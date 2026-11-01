@@ -5,6 +5,10 @@ services:
     volumes:
       - "${BASE_DIR:?BASE_DIR is required}/web:/data"
       - "web-cache:/cache"
+    environment:
+      # variables with a default (also an empty one) need no value in the env file
+      OPTIONAL_SETTING: "${OPTIONAL_SETTING:-}"
+      LOG_LEVEL: "${LOG_LEVEL:-info}"
     healthcheck:
       test: ["CMD", "true"]
   migrate:
