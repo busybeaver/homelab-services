@@ -12,7 +12,7 @@
       description: "Major updates from the own packages repo",
       matchUpdateTypes: ["major"],
       matchPackageNames: ["ghcr.io/busybeaver/homelab-packages/**"],
-      stabilityDays: 5,
+      minimumReleaseAge: "5 days",
       assignees: ["busybeaver"],
       reviewers: ["repository-assistant[bot]"],
       addLabels: ["major-update"],
