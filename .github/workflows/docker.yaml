@@ -29,6 +29,12 @@ jobs:
         with:
           fetch-depth: 1
 
+      - name: Check git-crypt encryption
+        run: |
+          set -Eeuo pipefail
+          bash .github/scripts/test-check-git-crypt.sh
+          bash .github/scripts/check-git-crypt.sh
+
       - name: Prepare environment
         run: |
           mkdir -p ./volumes/adguard/conf ./volumes/adguard/work ./volumes/adguard/cert

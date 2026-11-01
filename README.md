@@ -14,7 +14,8 @@ mise run format  # format all tracked files
 ```
 
 `docs/` is encrypted with [git-crypt](https://github.com/AGWA/git-crypt) for the homelab production GPG key. Run
-`git-crypt unlock` after cloning to read it.
+`git-crypt unlock` after cloning to read it. The pre-commit hook and CI fail if a file under `docs/` is staged unencrypted
+(which happens without a warning in a clone that is not unlocked).
 
 ## Releases
 
