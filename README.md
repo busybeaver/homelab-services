@@ -13,6 +13,9 @@ mise run check   # run all checks (same linter configs as the CI)
 mise run format  # format all tracked files
 ```
 
+`docs/` is encrypted with [git-crypt](https://github.com/AGWA/git-crypt) for the homelab production GPG key. Run
+`git-crypt unlock` after cloning to read it.
+
 ## Releases
 
 Hosts deploy only from signed GitHub Releases (design: [docs/plans](docs/plans/2026-10-16-homelab-services-github-releases-design.md)).

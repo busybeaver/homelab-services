@@ -24,6 +24,7 @@ pre-commit:
       glob: "*.{yaml,yml}"
       run: mise exec -- yamllint --config-file .github/linters/.yaml-lint.yml {staged_files}
     - name: editorconfig
+      exclude: [".git-crypt/**"] # binary git-crypt key
       run: mise exec -- editorconfig-checker -config .github/linters/.ecrc {staged_files}
 
 commit-msg:

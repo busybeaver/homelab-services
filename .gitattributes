@@ -1,0 +1,2 @@
+# git-crypt: docs/ is encrypted for the homelab production GPG key (see README)
+docs/** filter=git-crypt diff=git-crypt

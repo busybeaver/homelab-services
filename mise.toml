@@ -70,7 +70,7 @@ run = "gitleaks git --config .github/linters/.gitleaks.toml --redact --no-banner
 
 [tasks."check:editorconfig"]
 description = "Check all tracked files against .editorconfig"
-run = 'editorconfig-checker -config .github/linters/.ecrc $(git ls-files)'
+run = "editorconfig-checker -config .github/linters/.ecrc $(git ls-files ':!:.git-crypt/')"
 
 [tasks.commit]
 description = "Create a conventional commit, e.g. `mise run commit feat \"add service\" compose`"
