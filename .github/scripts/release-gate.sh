@@ -29,7 +29,7 @@ if [ -n "${last_tag}" ]; then
     echo "::notice::${HEAD_SHA} is not newer than ${last_tag} (out-of-order CI completion); skipping"
     release=false
   elif [ "${FORCE:-}" != "true" ] &&
-    [ -z "$(git diff --name-only "${last_sha}" "${HEAD_SHA}" -- 'docker-compose.*.yaml' ':(exclude)docker-compose.ci.yaml')" ]; then
+    [ -z "$(git diff --name-only "${last_sha}" "${HEAD_SHA}" -- 'docker-compose.*.yaml' ':(exclude)docker-compose.*.ci.yaml')" ]; then
     echo "::notice::no released Compose file changed since ${last_tag}; skipping"
     release=false
   fi

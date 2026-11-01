@@ -61,7 +61,7 @@ failed_with() { [ "${status}" -ne 0 ] && grep -qF -- "$1" "${work}/log"; }
 
 # --- release-gate.sh ---
 new_repo
-c1="$(commit c1 docker-compose.homelab.yaml v1 docker-compose.ci.yaml ci1 README.md r1)"
+c1="$(commit c1 docker-compose.homelab.yaml v1 docker-compose.homelab.ci.yaml ci1 README.md r1)"
 gate "${c1}" "" false
 assert "gate: first release" released
 assert "gate: first release has empty last_tag" has_output 'last_tag='
@@ -78,7 +78,7 @@ assert "gate: docs-only change is skipped" skipped
 gate "${c2}" v2026.01.01-1 true
 assert "gate: forced release without compose change" released
 
-c3="$(commit c3 docker-compose.ci.yaml ci2)"
+c3="$(commit c3 docker-compose.homelab.ci.yaml ci2)"
 gate "${c3}" v2026.01.01-1 false
 assert "gate: CI overlay change is skipped" skipped
 
@@ -119,7 +119,7 @@ assemble() {
 }
 
 new_repo
-commit base docker-compose.homelab.yaml h1 docker-compose.ci.yaml ci README.md r >/dev/null
+commit base docker-compose.homelab.yaml h1 docker-compose.homelab.ci.yaml ci README.md r >/dev/null
 mkdir -p "${work}/repo/fixtures"
 b1="$(commit "first target" docker-compose.cloud-a.yaml a1 fixtures/docker-compose.cloud-x.yaml x)"
 git -C "${work}/repo" tag v2026.01.01-1 "${b1}"

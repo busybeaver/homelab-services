@@ -21,7 +21,7 @@ mise run format  # format all tracked files
 Hosts deploy only from signed GitHub Releases (design: [docs/plans](docs/plans/2026-10-16-homelab-services-github-releases-design.md)).
 
 - **Trigger:** `Release CI` runs after every green `Docker CI` push run on `main`. It releases only if a released Compose
-  file (`docker-compose.<target>.yaml`, not `docker-compose.ci.yaml`) changed since the last release.
+  file (`docker-compose.<target>.yaml`, not the CI overlays `docker-compose.<target>.ci.yaml`) changed since the last release.
 - **Tag:** `v<YYYY.MM.DD>-<run number>` (UTC), strictly increasing.
 - **Assets:** every `docker-compose.<target>.yaml` as committed, `RELEASE` (the tag), `SHA256SUMS` and the cosign bundle
   `SHA256SUMS.sigstore.json`. Every release contains all targets.

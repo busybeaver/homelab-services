@@ -113,7 +113,7 @@ jobs:
           docker compose \
             --env-file .env.ci \
             -f docker-compose.homelab.yaml \
-            -f docker-compose.ci.yaml \
+            -f docker-compose.homelab.ci.yaml \
             config
 
       - name: Validate release targets
@@ -133,7 +133,7 @@ jobs:
           docker compose \
             --env-file .env.ci \
             -f docker-compose.homelab.yaml \
-            -f docker-compose.ci.yaml \
+            -f docker-compose.homelab.ci.yaml \
             up --abort-on-container-exit --exit-code-from test
 
       - name: Show container status and logs on failure
@@ -142,12 +142,12 @@ jobs:
           docker compose \
             --env-file .env.ci \
             -f docker-compose.homelab.yaml \
-            -f docker-compose.ci.yaml \
+            -f docker-compose.homelab.ci.yaml \
             ps --all
           docker compose \
             --env-file .env.ci \
             -f docker-compose.homelab.yaml \
-            -f docker-compose.ci.yaml \
+            -f docker-compose.homelab.ci.yaml \
             logs --no-color --tail 100
 
       - name: Tear down
@@ -156,5 +156,5 @@ jobs:
           docker compose \
             --env-file .env.ci \
             -f docker-compose.homelab.yaml \
-            -f docker-compose.ci.yaml \
+            -f docker-compose.homelab.ci.yaml \
             down --volumes --remove-orphans

@@ -42,7 +42,7 @@ run = 'oxfmt --check --no-error-on-unmatched-pattern $(git ls-files)'
 
 [tasks."check:compose"]
 description = "Validate the compose files with the CI environment"
-run = "docker compose --env-file .env.ci -f docker-compose.homelab.yaml -f docker-compose.ci.yaml config --quiet"
+run = "docker compose --env-file .env.ci -f docker-compose.homelab.yaml -f docker-compose.homelab.ci.yaml config --quiet"
 
 [tasks."check:release"]
 description = "Test the release scripts and check every release target (docker-compose.<target>.yaml) against the release policy"

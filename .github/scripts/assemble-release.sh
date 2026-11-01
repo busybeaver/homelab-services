@@ -52,11 +52,11 @@ printf '%s\n' "${TAG}" >"${dist}/RELEASE"
   if [ -n "${LAST_TAG:-}" ]; then
     echo "Changed targets since \`${LAST_TAG}\`:"
     # shellcheck disable=SC2016 # the backticks are Markdown
-    git diff --name-only "${LAST_TAG}" "${HEAD_SHA}" -- 'docker-compose.*.yaml' ':(exclude)docker-compose.ci.yaml' |
+    git diff --name-only "${LAST_TAG}" "${HEAD_SHA}" -- 'docker-compose.*.yaml' ':(exclude)docker-compose.*.ci.yaml' |
       sed -E 's/^docker-compose\.(.*)\.yaml$/- `\1`/'
     echo
     echo "Compose commits:"
-    git log --format='- %h %s' "${LAST_TAG}..${HEAD_SHA}" -- 'docker-compose.*.yaml' ':(exclude)docker-compose.ci.yaml'
+    git log --format='- %h %s' "${LAST_TAG}..${HEAD_SHA}" -- 'docker-compose.*.yaml' ':(exclude)docker-compose.*.ci.yaml'
     echo
   fi
   # shellcheck disable=SC2016 # the backticks are Markdown, not a command substitution
