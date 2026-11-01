@@ -139,6 +139,21 @@ assert "assemble: SHA256SUMS uses two spaces and bare names" \
 assert "assemble: SHA256SUMS verifies" bash -c "cd '${work}/dist' && sha256sum -c SHA256SUMS >/dev/null"
 assert "assemble: notes list the target commits since the last release" grep -q -- '- [0-9a-f]* feat: change homelab' "${work}/notes.md"
 assert "assemble: notes leave out commits that touch no target" bash -c "[ -s '${work}/notes.md' ] && ! grep -q 'first target' '${work}/notes.md'"
+# shellcheck disable=SC2016 # the backticks are Markdown
+assert "assemble: notes list the changed targets" grep -qx -- '- `homelab`' "${work}/notes.md"
+assert "assemble: notes leave out unchanged targets" bash -c "! grep -q 'cloud-a' '${work}/notes.md'"
+
+assemble v2026.01.01-1 "${b2}" v2026.01.01-1
+assert "assemble: tag equal to the last release fails" failed_with "is not newer than"
+assemble v2025.12.31-9 "${b2}" v2026.01.01-1
+assert "assemble: tag older than the last release fails" failed_with "is not newer than"
+git -C "${work}/repo" tag v2026.01.01-9 "${b1}"
+assemble v2026.01.01-10 "${b2}" v2026.01.01-9
+assert "assemble: run number compares numerically" [ "${status}" -eq 0 ]
+
+# --- release-targets.sh ---
+assert "targets: top-level targets only, CI overlay and nested files excluded, C order" \
+  [ "$(cd "${work}/repo" && bash "${scripts}/release-targets.sh" | tr '\n' ' ')" = "docker-compose.cloud-a.yaml docker-compose.homelab.yaml " ]
 
 assemble v2026.1.3-7 "${b2}" v2026.01.01-1
 assert "assemble: invalid tag fails" failed_with "invalid tag"

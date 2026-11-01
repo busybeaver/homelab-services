@@ -14,7 +14,14 @@ notes="${2:?release notes file required}"
   exit 1
 }
 
-mapfile -t targets < <(git ls-files 'docker-compose.*.yaml' | grep -vx 'docker-compose.ci.yaml' | LC_ALL=C sort)
+# hosts reject a release whose tag is not newer than the one they run (e.g. a re-run of an older run on the same day)
+if [ -n "${LAST_TAG:-}" ] &&
+  { [ "${TAG}" = "${LAST_TAG}" ] || [ "$(printf '%s\n' "${LAST_TAG}" "${TAG}" | sort -V | tail -n 1)" != "${TAG}" ]; }; then
+  echo "::error::tag ${TAG} is not newer than the last release ${LAST_TAG}"
+  exit 1
+fi
+
+mapfile -t targets < <(bash "$(dirname -- "${BASH_SOURCE[0]}")/release-targets.sh")
 [ "${#targets[@]}" -gt 0 ] || {
   echo "::error::no release targets found"
   exit 1
@@ -36,7 +43,12 @@ printf '%s\n' "${TAG}" >"${dist}/RELEASE"
   echo "Signed Docker Compose release \`${TAG}\` of ${HEAD_SHA}."
   echo
   if [ -n "${LAST_TAG:-}" ]; then
-    echo "Compose changes since \`${LAST_TAG}\`:"
+    echo "Changed targets since \`${LAST_TAG}\`:"
+    # shellcheck disable=SC2016 # the backticks are Markdown
+    git diff --name-only "${LAST_TAG}" "${HEAD_SHA}" -- 'docker-compose.*.yaml' ':(exclude)docker-compose.ci.yaml' |
+      sed -E 's/^docker-compose\.(.*)\.yaml$/- `\1`/'
+    echo
+    echo "Compose commits:"
     git log --format='- %h %s' "${LAST_TAG}..${HEAD_SHA}" -- 'docker-compose.*.yaml' ':(exclude)docker-compose.ci.yaml'
     echo
   fi

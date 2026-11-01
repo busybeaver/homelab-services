@@ -49,7 +49,7 @@ description = "Test the release scripts and check every release target (docker-c
 run = [
   "bash .github/scripts/test-check-compose-release.sh",
   "bash .github/scripts/test-release-scripts.sh",
-  'git ls-files "docker-compose.*.yaml" | grep -vx docker-compose.ci.yaml | while read -r file; do bash .github/scripts/check-compose-release.sh "$file" .env.ci || exit 1; done',
+  'bash .github/scripts/release-targets.sh | while read -r file; do bash .github/scripts/check-compose-release.sh "$file" .env.ci || exit 1; done',
 ]
 
 [tasks."check:shell"]

@@ -52,8 +52,6 @@ jobs:
       COSIGN_VERSION: v3.1.4
       HEAD_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
       FORCE: ${{ github.event_name == 'workflow_dispatch' && inputs.force }}
-      GH_TOKEN: ${{ github.token }}
-      GH_REPO: ${{ github.repository }}
 
     steps:
       - name: StepSecurity - Harden Github-hosted Runners
@@ -82,6 +80,10 @@ jobs:
 
       - name: Release - Verify Provenance and Change Gate
         id: release_gate
+        env:
+          # the token is only exposed to the steps that call the GitHub API
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
         run: |
           set -Eeuo pipefail
           if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
@@ -129,6 +131,8 @@ jobs:
         if: steps.release_gate.outputs.release == 'true'
         env:
           TAG: ${{ steps.release_assemble.outputs.tag }}
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
         run: |
           set -Eeuo pipefail
           if is_draft="$(gh release view "${TAG}" --json isDraft --jq '.isDraft' 2>/dev/null)"; then
