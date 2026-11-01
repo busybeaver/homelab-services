@@ -1,0 +1,16 @@
+# homelab target: macvlan and mac_address are allowed here
+services:
+  app:
+    image: "example/app:1.0.0@sha256:0000000000000000000000000000000000000000000000000000000000000001"
+    mac_address: "${LAN_MAC:?LAN_MAC is required}"
+    networks:
+      - lan
+    volumes:
+      - "${BASE_DIR:?BASE_DIR is required}/app:/data"
+      - "${BASE_DIR:?BASE_DIR is required}/app/conf:/conf:ro"
+    healthcheck:
+      test: ["CMD", "true"]
+
+networks:
+  lan:
+    driver: macvlan

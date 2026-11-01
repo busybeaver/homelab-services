@@ -313,6 +313,9 @@ services:
       TZ: "${TIMEZONE:?TIMEZONE is required}"
       PORT: "443"
     # no healthcheck here on purpose: the image already defines "HEALTHCHECK node /healthcheck.js" which reads uiPort/https from /data/settings.js (so those must be set there)
+    labels:
+      # tells the release policy check that the image defines the healthcheck
+      homelab.compose.image-healthcheck: "true"
     pids_limit: 300
     mem_limit: 768m
 
@@ -435,6 +438,9 @@ services:
       PORT: "8080"
       TZ: "${TIMEZONE:?TIMEZONE is required}"
     # no healthcheck here on purpose: the image already defines one (curl /health)
+    labels:
+      # tells the release policy check that the image defines the healthcheck
+      homelab.compose.image-healthcheck: "true"
     pids_limit: 300
     # the default local embedding model for RAG needs quite some memory
     mem_limit: 4g

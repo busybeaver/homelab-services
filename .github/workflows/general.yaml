@@ -30,5 +30,8 @@ jobs:
       statuses: write
 
     uses: busybeaver/homelab-shared/.github/workflows/general.yaml@e5bc968880ee2f22fb8b5f4b7191777cebc5fb2c # v1.1.95
+    with:
+      # git-crypt: docs/ is encrypted in CI checkouts and .git-crypt/ holds the binary key
+      filterRegexExclude: ".*(docs|\\.git-crypt)/.*"
     secrets:
       GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}

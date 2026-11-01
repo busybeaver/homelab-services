@@ -112,16 +112,28 @@ jobs:
         run: |
           docker compose \
             --env-file .env.ci \
-            -f docker-compose.yaml \
-            -f docker-compose.ci.yaml \
+            -f docker-compose.homelab.yaml \
+            -f docker-compose.homelab.ci.yaml \
             config
+
+      - name: Validate release targets
+        run: |
+          set -Eeuo pipefail
+          bash .github/scripts/test-check-compose-release.sh
+          bash .github/scripts/test-release-scripts.sh
+          mapfile -t targets < <(bash .github/scripts/release-targets.sh)
+          [ "${#targets[@]}" -gt 0 ] || { echo "::error::no release targets found"; exit 1; }
+          for file in "${targets[@]}"; do
+            docker compose --env-file .env.ci -f "${file}" config -q
+            bash .github/scripts/check-compose-release.sh "${file}" .env.ci
+          done
 
       - name: Run dynamic integration tests
         run: |
           docker compose \
             --env-file .env.ci \
-            -f docker-compose.yaml \
-            -f docker-compose.ci.yaml \
+            -f docker-compose.homelab.yaml \
+            -f docker-compose.homelab.ci.yaml \
             up --abort-on-container-exit --exit-code-from test
 
       - name: Show container status and logs on failure
@@ -129,13 +141,13 @@ jobs:
         run: |
           docker compose \
             --env-file .env.ci \
-            -f docker-compose.yaml \
-            -f docker-compose.ci.yaml \
+            -f docker-compose.homelab.yaml \
+            -f docker-compose.homelab.ci.yaml \
             ps --all
           docker compose \
             --env-file .env.ci \
-            -f docker-compose.yaml \
-            -f docker-compose.ci.yaml \
+            -f docker-compose.homelab.yaml \
+            -f docker-compose.homelab.ci.yaml \
             logs --no-color --tail 100
 
       - name: Tear down
@@ -143,6 +155,6 @@ jobs:
         run: |
           docker compose \
             --env-file .env.ci \
-            -f docker-compose.yaml \
-            -f docker-compose.ci.yaml \
+            -f docker-compose.homelab.yaml \
+            -f docker-compose.homelab.ci.yaml \
             down --volumes --remove-orphans

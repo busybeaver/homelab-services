@@ -1,0 +1,24 @@
+# cloud target: bridge only, every long-running service has a healthcheck (in the file or in its image)
+services:
+  web:
+    image: "example/web:1.0.0@sha256:0000000000000000000000000000000000000000000000000000000000000001"
+    volumes:
+      - "${BASE_DIR:?BASE_DIR is required}/web:/data"
+      - "web-cache:/cache"
+    environment:
+      # variables with a default (also an empty one) need no value in the env file
+      OPTIONAL_SETTING: "${OPTIONAL_SETTING:-}"
+      LOG_LEVEL: "${LOG_LEVEL:-info}"
+    healthcheck:
+      test: ["CMD", "true"]
+  migrate:
+    image: "example/migrate:1.0.0@sha256:0000000000000000000000000000000000000000000000000000000000000001"
+    labels:
+      homelab.compose.oneshot: "true"
+  ui:
+    image: "example/ui:1.0.0@sha256:0000000000000000000000000000000000000000000000000000000000000001"
+    labels:
+      homelab.compose.image-healthcheck: "true"
+
+volumes:
+  web-cache:
