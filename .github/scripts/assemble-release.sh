@@ -21,6 +21,13 @@ if [ -n "${LAST_TAG:-}" ] &&
   exit 1
 fi
 
+# tag creation is not restricted, and GitHub publishes a release on an existing tag instead of its --target commit
+if tag_sha="$(git rev-parse -q --verify "refs/tags/${TAG}^{commit}")" &&
+  [ "${tag_sha}" != "$(git rev-parse --verify "${HEAD_SHA}^{commit}")" ]; then
+  echo "::error::tag ${TAG} already exists at ${tag_sha}, not at ${HEAD_SHA}"
+  exit 1
+fi
+
 mapfile -t targets < <(bash "$(dirname -- "${BASH_SOURCE[0]}")/release-targets.sh")
 [ "${#targets[@]}" -gt 0 ] || {
   echo "::error::no release targets found"

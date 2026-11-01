@@ -150,6 +150,13 @@ assert "assemble: tag older than the last release fails" failed_with "is not new
 git -C "${work}/repo" tag v2026.01.01-9 "${b1}"
 assemble v2026.01.01-10 "${b2}" v2026.01.01-9
 assert "assemble: run number compares numerically" [ "${status}" -eq 0 ]
+# tag creation is not restricted, and GitHub publishes a release on an existing tag instead of --target
+git -C "${work}/repo" tag -a -m stray v2026.01.04-1 "${b1}"
+assemble v2026.01.04-1 "${b2}" v2026.01.01-1
+assert "assemble: existing tag at another commit fails" failed_with "already exists"
+git -C "${work}/repo" tag v2026.01.04-2 "${b2}"
+assemble v2026.01.04-2 "${b2}" v2026.01.01-1
+assert "assemble: existing tag at the release commit succeeds" [ "${status}" -eq 0 ]
 
 # --- release-targets.sh ---
 assert "targets: top-level targets only, CI overlay and nested files excluded, C order" \
