@@ -28,18 +28,18 @@ alias = "init"
 run = ["mise install", "lefthook install"]
 
 [tasks.format]
-description = "Format files; formats all tracked files if no files are given"
+description = "Format files; formats all tracked files (without encrypted ones) if no files are given"
 alias = "fmt"
 usage = 'arg "[files]..." help="Files to format"'
-run = 'oxfmt --no-error-on-unmatched-pattern ${usage_files:-$(git ls-files)}'
+run = 'oxfmt --no-error-on-unmatched-pattern ${usage_files:-$(bash .github/scripts/plaintext-files.sh)}'
 
 [tasks.check]
 description = "Run all checks"
 depends = ["check:*"]
 
 [tasks."check:format"]
-description = "Check that all tracked files are formatted"
-run = 'oxfmt --check --no-error-on-unmatched-pattern $(git ls-files)'
+description = "Check that all tracked files are formatted; skips files git-crypt still encrypts"
+run = 'oxfmt --check --no-error-on-unmatched-pattern $(bash .github/scripts/plaintext-files.sh)'
 
 [tasks."check:compose"]
 description = "Validate the compose files with the CI environment"
@@ -74,8 +74,8 @@ description = "Test the git-crypt check and check that every file git-crypt encr
 run = ["bash .github/scripts/test-check-git-crypt.sh", "bash .github/scripts/check-git-crypt.sh"]
 
 [tasks."check:editorconfig"]
-description = "Check all tracked files against .editorconfig"
-run = "editorconfig-checker -config .github/linters/.ecrc $(git ls-files ':!:.git-crypt/')"
+description = "Check all tracked files against .editorconfig; skips files git-crypt still encrypts"
+run = "editorconfig-checker -config .github/linters/.ecrc $(bash .github/scripts/plaintext-files.sh ':!:.git-crypt/')"
 
 [tasks.commit]
 description = "Create a conventional commit, e.g. `mise run commit feat \"add service\" compose`"

@@ -73,5 +73,23 @@ git -C "${work}/repo" add secret/empty.md
 check
 assert "empty file in an encrypted path fails" failed_with "secret/empty.md"
 
+# --- plaintext-files.sh ---
+# usage: listed [<pathspec>...] ; prints the files plaintext-files.sh lists, one per line
+listed() { (cd "${work}/repo" && bash "${scripts}/plaintext-files.sh" "$@"); }
+
+new_repo
+stage secret/a.md encrypted
+stage 'public/with space.md' plain
+assert "files: an encrypted file in a clone that is not unlocked is left out" \
+  [ "$(listed | tr '\n' '|')" = ".gitattributes|public/with space.md|" ]
+
+new_repo
+stage secret/a.md plain
+assert "files: a decrypted file in an unlocked clone is listed" [ "$(listed | tr '\n' '|')" = ".gitattributes|secret/a.md|" ]
+
+new_repo
+stage public/b.md plain
+assert "files: pathspecs narrow the list" [ "$(listed ':!:.gitattributes' | tr '\n' '|')" = "public/b.md|" ]
+
 echo "${tests} tests, ${failures} failures"
 [ "${failures}" -eq 0 ]
